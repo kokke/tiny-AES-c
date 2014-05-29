@@ -1,5 +1,14 @@
 This is a small portable (and slow) implementation of AES128 in C.
 
+AES128 ECB is symmetric, so you use the same function for encrypting and decrypting.
+
 The module uses less than 250 bytes of RAM and ~1.5K ROM.
 
-AES128 ECB is symmetric, so you use the same function for encrypting and decrypting.
+
+GCC size output when compiled for ARM:
+
+    $ arm-none-eabi-gcc -Os -c aes.c -o aes.o
+    $ size aes.o
+       text    data     bss     dec     hex filename
+       1447       0     204    1651     673 aes.o
+
