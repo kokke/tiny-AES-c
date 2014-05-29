@@ -24,8 +24,6 @@ ECB-AES128
     c6d3416d29165c6fcb8e51a227ba994e
 
 
-Use aes_encrypt_string() to encrypt or decrypt a string
-
 NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
         You should pad the end of the string with zeros if this is not the case.
 
