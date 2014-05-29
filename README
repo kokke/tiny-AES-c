@@ -14,7 +14,6 @@ $ size aes.o
    1079	      0	    204	   1283	    503	aes.o
 
 
-Using Mentor Graphics GCC port for ARM:
 
 $ arm-none-eabi-gcc --version
 arm-none-eabi-gcc (GNU Tools for ARM Embedded Processors) 4.8.3 20131129 (release) [ARM/embedded-4_8-branch revision 205641]
