@@ -137,7 +137,7 @@ static void KeyExpansion()
   }
 
   // All other round keys are found from the previous round keys.
-  for(; (i < (Nb * Nr) + 1); ++i)
+  for(; (i < (Nb * (Nr + 1)); ++i)
   {
     for(j = 0; j < 4; ++j)
     {
