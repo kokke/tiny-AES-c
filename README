@@ -7,8 +7,8 @@ The module uses less than 250 bytes of RAM and ~1.5K ROM.
 
 GCC size output when compiled for ARM:
 
-    $ arm-none-eabi-gcc -Os -c aes.c -o aes.o
-    $ size aes.o
-       text    data     bss     dec     hex filename
-       1447       0     204    1651     673 aes.o
+$ arm-none-eabi-gcc -Os -c aes.c -o aes.o
+$ size aes.o
+   text    data     bss     dec     hex filename
+   1447       0     204    1651     673 aes.o
 
