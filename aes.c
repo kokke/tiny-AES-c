@@ -68,10 +68,9 @@ static uint8_t RoundKey[176];
 // The Key input to the AES Program
 static uint8_t* Key;
 
-// Marked const so it can be placed in read-only storage instead of RAM
+// The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM - 
 // This can be useful in (embedded) bootloader applications, where ROM is often limited.
-
 static const uint8_t sbox[256] =   {
   //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -303,7 +302,6 @@ static void Cipher()
 
   // The encryption process is over.
   // Copy the state array to output array.
-  
   for(i = 0; i < 4; ++i)
   {
     for(j = 0; j < 4; ++j)
