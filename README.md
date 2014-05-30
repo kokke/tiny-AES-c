@@ -33,6 +33,7 @@ Somehow, -O2 is a bit smaller than -Os with this compiler. I am using Mentor Gra
 
 
 The implementation is verified against the data in:
+
 [National Institute of Standards and Technology Special Publication 800-38A 2001 ED](http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf) Appendix F: Example Vectors for Modes of Operation of the AES.
 
 
