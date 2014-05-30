@@ -180,7 +180,7 @@ static void KeyExpansion()
         tempa[3] = getSBoxValue(tempa[3]);
       }
     }
-    RoundKey[ i * 4 ]     = RoundKey[ i - Nk  * 4 ]      ^ tempa[0];
+    RoundKey[ i * 4 ]     = RoundKey[(i - Nk) * 4 ]      ^ tempa[0];
     RoundKey[(i * 4) + 1] = RoundKey[(i - Nk) * (4 + 1)] ^ tempa[1];
     RoundKey[(i * 4) + 2] = RoundKey[(i - Nk) * (4 + 2)] ^ tempa[2];
     RoundKey[(i * 4) + 3] = RoundKey[(i - Nk) * (4 + 3)] ^ tempa[3];
