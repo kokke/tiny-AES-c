@@ -1,6 +1,6 @@
 ### Tiny AES128 in C
 
-This is a small portable implementation of AES128 in C.
+This is a small portable implementation of AES128 in C. The module is self-hosting and intented to be portable. I've successfully tested on Intel 64bit, 32bit ARM Cortex-M3 and 8 bit Atmel Mega16.
 
 AES128 ECB is symmetric, so you use the same function for encrypting and decrypting.
 
