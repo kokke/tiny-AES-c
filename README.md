@@ -1,8 +1,8 @@
 ### Tiny AES128 in C
 
-This is a small portable implementation of AES128 in C. The module is self-hosting and intented to be portable. I've successfully tested on Intel 64bit, 32bit ARM Cortex-M3 and 8 bit Atmel Mega16.
+This is a small portable implementation of AES128 in C. This is the smallest implementation in C I've seen yet, but if you find something smaller (or have improvements for the code in this project) please contact me or fork the project.
 
-AES128 ECB is symmetric, so you use the same function for encrypting and decrypting.
+The code is tested on Intel 64bit, 32bit ARM Cortex-M3 and 8 bit Atmel Mega16.
 
 The module uses just a bit more than 200 bytes of RAM and 1K ROM when compiled for ARM.
 YMMV depending on target platform and optimization skills of your compiler.
@@ -31,5 +31,6 @@ Somehow, -O2 is a bit smaller than -Os with this compiler. I am using Mentor Gra
 
 
 The implementation is verified against the data in:
+[National Institute of Standards and Technology Special Publication 800-38A 2001 ED](http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf) Appendix F: Example Vectors for Modes of Operation of the AES.
 
-**[National Institute of Standards and Technology Special Publication 800-38A 2001 ED](http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf) Appendix F: Example Vectors for Modes of Operation of the AES.**
+Note: AES128 ECB is symmetric, so you use the same function for encrypting and decrypting.
