@@ -17,13 +17,13 @@ GCC size output when compiled for ARM:
        1079       0     204    1283     503 aes.o
 
 
+This is using Mentor Graphics ARM GCC port:
 
-
-$ arm-none-eabi-gcc --version
-arm-none-eabi-gcc (GNU Tools for ARM Embedded Processors) 4.8.3 20131129 (release) [ARM/embedded-4_8-branch revision 205641]
-Copyright (C) 2013 Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    $ arm-none-eabi-gcc --version
+    arm-none-eabi-gcc (GNU Tools for ARM Embedded Processors) 4.8.3 20131129 (release) [ARM/embedded-4_8-branch revision 205641]
+    Copyright (C) 2013 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 
 The implementation is verified against the data in National Institute of Standards and Technology Special Publication 800-38A 2001 ED.
