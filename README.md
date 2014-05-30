@@ -15,9 +15,13 @@ GCC size output when compiled for ARM:
     $ size aes.o
        text    data     bss     dec     hex filename
        1079       0     204    1283     503 aes.o
+    $ arm-none-eabi-gcc -O2 -c aes.c -o aes.o
+    $ size aes.o
+       text    data     bss     dec     hex filename
+       1024       0     204    1228     4cc aes.o
 
 
-This is using Mentor Graphics ARM GCC port:
+Somehow, -O2 is a bit smaller than -Os with this compiler. I am using Mentor Graphics ARM toolchain:
 
     $ arm-none-eabi-gcc --version
     arm-none-eabi-gcc (GNU Tools for ARM Embedded Processors) 4.8.3 20131129 (release) [ARM/embedded-4_8-branch revision 205641]
