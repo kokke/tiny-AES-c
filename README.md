@@ -10,12 +10,12 @@ YMMV depending on target platform and optimization skills of your compiler.
 
 GCC size output when compiled for ARM:
 
-`
-$ arm-none-eabi-gcc -Os -c aes.c -o aes.o
-$ size aes.o
-   text	   data	    bss	    dec	    hex	filename
-   1079	      0	    204	   1283	    503	aes.o
-`
+
+    $ arm-none-eabi-gcc -Os -c aes.c -o aes.o
+    $ size aes.o
+     text	   data	    bss	    dec	    hex	filename
+     1079	      0	    204	   1283	    503	aes.o
+
 
 
 
