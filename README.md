@@ -1,6 +1,6 @@
 ### Tiny AES128 in C
 
-This is a small portable (and slow?) implementation of AES128 in C.
+This is a small portable implementation of AES128 in C.
 
 AES128 ECB is symmetric, so you use the same function for encrypting and decrypting.
 
