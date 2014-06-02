@@ -17,10 +17,23 @@ GCC size output when compiled for ARM:
     $ size aes.o
        text    data     bss     dec     hex filename
        1079       0     204    1283     503 aes.o
+       
     $ arm-none-eabi-gcc -O2 -c aes.c -o aes.o
     $ size aes.o
        text    data     bss     dec     hex filename
        1024       0     204    1228     4cc aes.o
+
+
+And if we're compiling for the Thumb ISA:
+
+    $ arm-none-eabi-gcc -O2 -c -mthumb aes.c -o aes.o
+    $ size aes.o
+       text    data     bss     dec     hex filename
+        856       0     204    1060     424 aes.o
+    $ arm-none-eabi-gcc -Os -c -mthumb aes.c -o aes.o
+    $ size aes.o
+       text    data     bss     dec     hex filename
+        867       0     204    1071     42f aes.o
 
 
 
