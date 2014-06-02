@@ -13,31 +13,14 @@ I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
 GCC size output when compiled for ARM:
 
 
-    $ arm-none-eabi-gcc -Os -c aes.c -o aes.o
-    $ size aes.o
-       text    data     bss     dec     hex filename
-       1079       0     204    1283     503 aes.o
-       
-    $ arm-none-eabi-gcc -O2 -c aes.c -o aes.o
-    $ size aes.o
-       text    data     bss     dec     hex filename
-       1024       0     204    1228     4cc aes.o
 
-
-And if we're compiling for the Thumb ISA:
-
-    $ arm-none-eabi-gcc -O2 -c -mthumb aes.c -o aes.o
-    $ size aes.o
-       text    data     bss     dec     hex filename
-        856       0     204    1060     424 aes.o
     $ arm-none-eabi-gcc -Os -c -mthumb aes.c -o aes.o
     $ size aes.o
        text    data     bss     dec     hex filename
-        867       0     204    1071     42f aes.o
+       1107       0     204    1311     51f aes.o
 
 
-
-Somehow, -O2 is a bit smaller than -Os with this compiler. I am using Mentor Graphics ARM toolchain:
+I am using Mentor Graphics ARM toolchain:
 
 
     $ arm-none-eabi-gcc --version
