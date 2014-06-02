@@ -47,7 +47,7 @@ static void test_ECB(void)
     printf("ciphertext:\n");
     for(i = 0; i < 4; ++i)
     {
-        AES128_ECB(plain_text + (i*16), key, buf+(i*16));
+        AES128_ECB_encrypt(plain_text + (i*16), key, buf+(i*16));
         phex(buf + (i*16));
     }
     printf("\n");
