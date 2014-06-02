@@ -315,7 +315,7 @@ static void Cipher()
 /* Public functions:                                                         */
 /*****************************************************************************/
 
-void AES128_ECB(uint8_t* input, uint8_t* key, uint8_t *output)
+void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output)
 {
   // Copy the Key and CipherText
   Key = key;
