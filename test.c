@@ -51,17 +51,7 @@ static void test_ECB(void)
         phex(buf + (i*16));
     }
     printf("\n");
-
-    // print the resulting cipher as 4 x 16 byte strings
-    printf("back to plain text again:\n");
-    for(i = 0; i < 4; ++i)
-    {
-        AES128_ECB(buf + (i*16), key, buf2+(i*16));
-        phex(plain_text + (i*16));
-    }
-    printf("\n");
 }
-
 
 // prints string as hex
 void phex(uint8_t* str)
