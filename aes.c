@@ -129,7 +129,7 @@ static void KeyExpansion()
   // The first round key is the key itself.
   for(i = 0; i < Nk; ++i)
   {
-    RoundKey[ i * 4 ]     = Key[ i * 4 ];
+    RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
     RoundKey[(i * 4) + 1] = Key[(i * 4) + 1];
     RoundKey[(i * 4) + 2] = Key[(i * 4) + 2];
     RoundKey[(i * 4) + 3] = Key[(i * 4) + 3];
@@ -179,7 +179,7 @@ static void KeyExpansion()
         tempa[3] = getSBoxValue(tempa[3]);
       }
     }
-    RoundKey[i * 4]     = RoundKey[(i - Nk) * 4]     ^ tempa[0];
+    RoundKey[i * 4 + 0] = RoundKey[(i - Nk) * 4 + 0] ^ tempa[0];
     RoundKey[i * 4 + 1] = RoundKey[(i - Nk) * 4 + 1] ^ tempa[1];
     RoundKey[i * 4 + 2] = RoundKey[(i - Nk) * 4 + 2] ^ tempa[2];
     RoundKey[i * 4 + 3] = RoundKey[(i - Nk) * 4 + 3] ^ tempa[3];
