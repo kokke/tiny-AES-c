@@ -1,6 +1,6 @@
 ### Tiny AES128 in C
 
-This is a small and portable implementation of the AES128 algorithm implemented in C.
+This is a small and portable implementation of the AES128 ECB encryption algorithm implemented in C.
 
 The module uses just a bit more than 200 bytes of RAM and 1K ROM when compiled for ARM (YMMV).
 
