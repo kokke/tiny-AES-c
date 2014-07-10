@@ -20,7 +20,7 @@ GCC size output when compiled for ARM:
        1107       0     204    1311     51f aes.o
 
 
-I am using Mentor Graphics ARM toolchain:
+I am using Mentor Graphics free ARM toolchain:
 
 
     $ arm-none-eabi-gcc --version
