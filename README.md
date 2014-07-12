@@ -2,7 +2,7 @@
 
 This is a small and portable implementation of the AES128 ECB encryption algorithm implemented in C.
 
-The module uses just a bit more than 200 bytes of RAM and 2.7K ROM when compiled for ARM (YMMV).
+The module uses just a bit more than 200 bytes of RAM and 2.5K ROM when compiled for ARM (YMMV).
 
 It is the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here).
 
