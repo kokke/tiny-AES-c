@@ -9,7 +9,7 @@ void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output);
 void AES128_ECB_decrypt(uint8_t* input, uint8_t* key, uint8_t *output);
 ```
 
-The module uses just a bit more than 200 bytes of RAM and 2.5K ROM when compiled for ARM (YMMV).
+The module uses just a bit more than 200 bytes of RAM and 2.5K ROM when compiled for ARM (<2K for Thumb but YMMV).
 
 It is the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here).
 
@@ -25,6 +25,14 @@ GCC size output when compiled for ARM:
     $ size aes.o
        text    data     bss     dec     hex filename
        2515       0     204    2719     a9f aes.o
+
+
+.. and when compiling for the THUMB instruction set, we end up at just below 2K in code size.
+
+    $ arm-none-eabi-gcc -mthumb -Os -c aes.c
+    $ size aes.o
+       text    data     bss     dec     hex filename
+       1883       0     204    2087     827 aes.o
 
 
 I am using Mentor Graphics free ARM toolchain:
