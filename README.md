@@ -4,10 +4,10 @@ This is a small and portable implementation of the AES128 ECB encryption algorit
 
 The API is very simple and looks like this (I am using stdint.h annotated types):
 
-
-    void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output);
-    void AES128_ECB_decrypt(uint8_t* input, uint8_t* key, uint8_t *output);
-
+```
+void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output);
+void AES128_ECB_decrypt(uint8_t* input, uint8_t* key, uint8_t *output);
+```
 
 The module uses just a bit more than 200 bytes of RAM and 2.5K ROM when compiled for ARM (YMMV).
 
