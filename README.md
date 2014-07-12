@@ -1,8 +1,8 @@
 ### Tiny AES128 in C
 
-This is a small and portable implementation of the AES128 ECB encryption algorithm implemented in C. I haven't finished the decryption part yet, but it will come.
+This is a small and portable implementation of the AES128 ECB encryption algorithm implemented in C.
 
-The module uses just a bit more than 200 bytes of RAM and 1K ROM when compiled for ARM (YMMV).
+The module uses just a bit more than 200 bytes of RAM and 2.7K ROM when compiled for ARM (YMMV).
 
 It is the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here).
 
@@ -14,10 +14,10 @@ GCC size output when compiled for ARM:
 
 
 
-    $ arm-none-eabi-gcc -Os -c -mthumb aes.c -o aes.o
+    $ arm-none-eabi-gcc -Os -c aes.c
     $ size aes.o
        text    data     bss     dec     hex filename
-       1107       0     204    1311     51f aes.o
+       2515       0     204    2719     a9f aes.o
 
 
 I am using Mentor Graphics free ARM toolchain:
