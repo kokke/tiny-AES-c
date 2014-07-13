@@ -2,7 +2,7 @@
 
 This is a small and portable implementation of the AES128 ECB encryption algorithm implemented in C.
 
-The API is very simple and looks like this (I am using C99/`<stdint.h>`-style annotated types):
+The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
 ```C
 void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output);
