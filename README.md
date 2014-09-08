@@ -52,5 +52,5 @@ This implementation is verified against the data in:
 [National Institute of Standards and Technology Special Publication 800-38A 2001 ED](http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf) Appendix F: Example Vectors for Modes of Operation of the AES.
 
 
-This project is released to the public domain. 
+All material in this repository is in the public domain.
 
