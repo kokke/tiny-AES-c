@@ -18,10 +18,10 @@ ECB-AES128
     2b7e151628aed2a6abf7158809cf4f3c
 
   resulting cipher
-    50fe67cc996d32b6da0937e99bafec60
-    d9a4dada0892239f6b8b3d7680e15674
-    a78819583f0308e7a6bf36b1386abf23
-    c6d3416d29165c6fcb8e51a227ba994e
+    3ad77bb40d7a3660a89ecaf32466ef97 
+    f5d3d58503b9699de785895a96fdbaaf 
+    43b1cd7f598ece23881b00e3ed030688 
+    7b0c785e27e8ad3f8223207104725dd4 
 
 
 NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
@@ -65,7 +65,7 @@ static uint8_t* in, *out, state[4][4];
 static uint8_t RoundKey[176];
 
 // The Key input to the AES Program
-static uint8_t* Key;
+static const uint8_t* Key;
 
 // The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM - 
@@ -291,7 +291,14 @@ static void MixColumns()
 }
 
 // Multiplty is a macro used to multiply numbers in the field GF(2^8)
-#define Multiply(x,y) (((y & 1) * x) ^ ((y>>1 & 1) * xtime(x)) ^ ((y>>2 & 1) * xtime(xtime(x))) ^ ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^ ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))
+static uint8_t Multiply(uint8_t x, uint8_t y)
+{
+	return (((y & 1) * x) ^ 
+			((y>>1 & 1) * xtime(x)) ^
+			((y>>2 & 1) * xtime(xtime(x))) ^
+			((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
+			((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))));
+}
 
 
 // MixColumns function mixes the columns of the state matrix.
@@ -456,7 +463,7 @@ static void InvCipher()
 /* Public functions:                                                         */
 /*****************************************************************************/
 
-void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output)
+void AES128_ECB_encrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
 {
   // Copy the Key and CipherText
   Key = key;
@@ -470,7 +477,7 @@ void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output)
   Cipher();
 }
 
-void AES128_ECB_decrypt(uint8_t* input, uint8_t* key, uint8_t *output)
+void AES128_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
 {
   Key = key;
   in = input;
