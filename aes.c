@@ -18,19 +18,16 @@ ECB-AES128
     2b7e151628aed2a6abf7158809cf4f3c
 
   resulting cipher
-    50fe67cc996d32b6da0937e99bafec60
-    d9a4dada0892239f6b8b3d7680e15674
-    a78819583f0308e7a6bf36b1386abf23
-    c6d3416d29165c6fcb8e51a227ba994e
+    3ad77bb40d7a3660a89ecaf32466ef97 
+    f5d3d58503b9699de785895a96fdbaaf 
+    43b1cd7f598ece23881b00e3ed030688 
+    7b0c785e27e8ad3f8223207104725dd4 
 
 
 NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
         You should pad the end of the string with zeros if this is not the case.
 
 */
-
-#ifndef _AES_C_
-#define _AES_C_
 
 
 /*****************************************************************************/
@@ -52,6 +49,10 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 // The number of rounds in AES Cipher.
 #define Nr 10
 
+// jcallan@github points out that declaring Multiply as a function 
+// reduces code size considerably with the Keil ARM compiler.
+// See this link for more information: https://github.com/kokke/tiny-AES128-C/pull/3
+#define MULTIPLY_AS_A_FUNCTION 0
 
 /*****************************************************************************/
 /* Private variables:                                                        */
@@ -143,9 +144,8 @@ static uint8_t getSBoxInvert(uint8_t num)
   return rsbox[num];
 }
 
-
 // This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states. 
-static void KeyExpansion()
+static void KeyExpansion(void)
 {
   uint32_t i, j, k;
   uint8_t tempa[4]; // Used for the column/row operations
@@ -212,10 +212,10 @@ static void KeyExpansion()
 
 // This function adds the round key to state.
 // The round key is added to the state by an XOR function.
-static void AddRoundKey(uint8_t round) 
+static void AddRoundKey(uint8_t round)
 {
   uint8_t i,j;
-  for(i=0;i<4;i++)
+  for(i=0;i<4;++i)
   {
     for(j = 0; j < 4; ++j)
     {
@@ -226,7 +226,7 @@ static void AddRoundKey(uint8_t round)
 
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
-static void SubBytes()
+static void SubBytes(void)
 {
   uint8_t i, j;
   for(i = 0; i < 4; ++i)
@@ -241,7 +241,7 @@ static void SubBytes()
 // The ShiftRows() function shifts the rows in the state to the left.
 // Each row is shifted with different offset.
 // Offset = Row number. So the first row is not shifted.
-static void ShiftRows()
+static void ShiftRows(void)
 {
   uint8_t temp;
 
@@ -275,7 +275,7 @@ static uint8_t xtime(uint8_t x)
 }
 
 // MixColumns function mixes the columns of the state matrix
-static void MixColumns()
+static void MixColumns(void)
 {
   uint8_t i;
   uint8_t Tmp,Tm,t;
@@ -290,18 +290,36 @@ static void MixColumns()
   }
 }
 
-// Multiplty is a macro used to multiply numbers in the field GF(2^8)
-#define Multiply(x,y) (((y & 1) * x) ^ ((y>>1 & 1) * xtime(x)) ^ ((y>>2 & 1) * xtime(xtime(x))) ^ ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^ ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))
+// Multiply is used to multiply numbers in the field GF(2^8)
+#if MULTIPLY_AS_A_FUNCTION
+static uint8_t Multiply(uint8_t x, uint8_t y)
+{
+  return (((y & 1) * x) ^
+       ((y>>1 & 1) * xtime(x)) ^
+       ((y>>2 & 1) * xtime(xtime(x))) ^
+       ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
+       ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))));
+  }
+#else
+#define Multiply(x, y)                                \
+      (  ((y & 1) * x) ^                              \
+      ((y>>1 & 1) * xtime(x)) ^                       \
+      ((y>>2 & 1) * xtime(xtime(x))) ^                \
+      ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^         \
+      ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))   \
+
+#endif
+
 
 
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
-static void InvMixColumns()
+static void InvMixColumns(void)
 {
   int i;
   uint8_t a,b,c,d;
-  for(i=0;i<4;i++)
+  for(i=0;i<4;++i)
   { 
   
     a = state[0][i];
@@ -320,20 +338,19 @@ static void InvMixColumns()
 
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
-static void InvSubBytes()
+static void InvSubBytes(void)
 {
   uint8_t i,j;
-  for(i=0;i<4;i++)
+  for(i=0;i<4;++i)
   {
-    for(j=0;j<4;j++)
+    for(j=0;j<4;++j)
     {
       state[i][j] = getSBoxInvert(state[i][j]);
     }
   }
 }
 
-
-static void InvShiftRows()
+static void InvShiftRows(void)
 {
   uint8_t temp;
 
@@ -363,7 +380,7 @@ static void InvShiftRows()
 
 
 // Cipher is the main function that encrypts the PlainText.
-static void Cipher()
+static void Cipher(void)
 {
   uint8_t i, j, round = 0;
 
@@ -407,14 +424,14 @@ static void Cipher()
   }
 }
 
-static void InvCipher()
+static void InvCipher(void)
 {
   uint8_t i,j,round=0;
 
   // Copy the input CipherText to state array.
-  for(i=0;i<4;i++)
+  for(i=0;i<4;++i)
   {
-    for(j=0;j<4;j++)
+    for(j=0;j<4;++j)
     {
       state[j][i] = in[i*4 + j];
     }
@@ -442,9 +459,9 @@ static void InvCipher()
 
   // The decryption process is over.
   // Copy the state array to output array.
-  for(i=0;i<4;i++)
+  for(i=0;i<4;++i)
   {
-    for(j=0;j<4;j++)
+    for(j=0;j<4;++j)
     {
       out[i*4+j]=state[j][i];
     }
@@ -480,7 +497,4 @@ void AES128_ECB_decrypt(uint8_t* input, uint8_t* key, uint8_t *output)
 
   InvCipher();
 }
-
-#endif //_AES_C_
-
 
