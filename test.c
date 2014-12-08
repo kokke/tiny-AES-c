@@ -76,7 +76,7 @@ static void test_decrypt(void)
 
   printf("decrypt: ");
 
-  if(0 == strncmp(out, buffer, 16))
+  if(0 == strncmp((char*) out, (char*) buffer, 16))
   {
     printf("SUCCESS!\n");
   }
