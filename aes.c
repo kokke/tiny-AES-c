@@ -473,7 +473,7 @@ static void InvCipher(void)
 /* Public functions:                                                         */
 /*****************************************************************************/
 
-void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output)
+void AES128_ECB_encrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
 {
   // Copy the Key and CipherText
   Key = key;
@@ -487,7 +487,7 @@ void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t *output)
   Cipher();
 }
 
-void AES128_ECB_decrypt(uint8_t* input, uint8_t* key, uint8_t *output)
+void AES128_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
 {
   Key = key;
   in = input;
