@@ -66,7 +66,7 @@ static uint8_t* in, *out, state[4][4];
 static uint8_t RoundKey[176];
 
 // The Key input to the AES Program
-static uint8_t* Key;
+static const uint8_t* Key;
 
 // The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM - 
