@@ -8,7 +8,7 @@ static void test_ECB(void);
 static void test_decrypt(void);
 
 
-int main(int argc, char** argv)
+int main(void)
 {
     test_ECB();
     test_decrypt();
