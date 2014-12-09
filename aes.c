@@ -60,7 +60,9 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 // in    - pointer to the CipherText to be decrypted.
 // out   - pointer to buffer to hold output of the decryption.
 // state - array holding the intermediate results during decryption.
-static uint8_t* in, *out, state[4][4];
+//static uint8_t* in, *out, state[4][4];
+typedef uint8_t state_t[4][4];
+static state_t* state;
 
 // The array that stores the round keys.
 static uint8_t RoundKey[176];
@@ -219,7 +221,7 @@ static void AddRoundKey(uint8_t round)
   {
     for(j = 0; j < 4; ++j)
     {
-      state[j][i] ^= RoundKey[round * Nb * 4 + i * Nb + j];
+      (*state)[i][j] ^= RoundKey[round * Nb * 4 + i * Nb + j];
     }
   }
 }
@@ -233,7 +235,7 @@ static void SubBytes(void)
   {
     for(j = 0; j < 4; ++j)
     {
-      state[i][j] = getSBoxValue(state[i][j]);
+      (*state)[j][i] = getSBoxValue((*state)[j][i]);
     }
   }
 }
@@ -246,27 +248,27 @@ static void ShiftRows(void)
   uint8_t temp;
 
   // Rotate first row 1 columns to left  
-  temp        = state[1][0];
-  state[1][0] = state[1][1];
-  state[1][1] = state[1][2];
-  state[1][2] = state[1][3];
-  state[1][3] = temp;
+  temp           = (*state)[0][1];
+  (*state)[0][1] = (*state)[1][1];
+  (*state)[1][1] = (*state)[2][1];
+  (*state)[2][1] = (*state)[3][1];
+  (*state)[3][1] = temp;
 
   // Rotate second row 2 columns to left  
-  temp        = state[2][0];
-  state[2][0] = state[2][2];
-  state[2][2] = temp;
+  temp           = (*state)[0][2];
+  (*state)[0][2] = (*state)[2][2];
+  (*state)[2][2] = temp;
 
-  temp = state[2][1];
-  state[2][1] = state[2][3];
-  state[2][3] = temp;
+  temp 			 = (*state)[1][2];
+  (*state)[1][2] = (*state)[3][2];
+  (*state)[3][2] = temp;
 
   // Rotate third row 3 columns to left
-  temp = state[3][0];
-  state[3][0] = state[3][3];
-  state[3][3] = state[3][2];
-  state[3][2] = state[3][1];
-  state[3][1] = temp;
+  temp 			 = (*state)[0][3];
+  (*state)[0][3] = (*state)[3][3];
+  (*state)[3][3] = (*state)[2][3];
+  (*state)[2][3] = (*state)[1][3];
+  (*state)[1][3] = temp;
 }
 
 static uint8_t xtime(uint8_t x)
@@ -281,12 +283,12 @@ static void MixColumns(void)
   uint8_t Tmp,Tm,t;
   for(i = 0; i < 4; ++i)
   {  
-    t   = state[0][i];
-    Tmp = state[0][i] ^ state[1][i] ^ state[2][i] ^ state[3][i] ;
-    Tm  = state[0][i] ^ state[1][i] ; Tm = xtime(Tm); state[0][i] ^= Tm ^ Tmp ;
-    Tm  = state[1][i] ^ state[2][i] ; Tm = xtime(Tm); state[1][i] ^= Tm ^ Tmp ;
-    Tm  = state[2][i] ^ state[3][i] ; Tm = xtime(Tm); state[2][i] ^= Tm ^ Tmp ;
-    Tm  = state[3][i] ^ t ;           Tm = xtime(Tm); state[3][i] ^= Tm ^ Tmp ;
+    t   = (*state)[i][0];
+    Tmp = (*state)[i][0] ^ (*state)[i][1] ^ (*state)[i][2] ^ (*state)[i][3] ;
+    Tm  = (*state)[i][0] ^ (*state)[i][1] ; Tm = xtime(Tm);  (*state)[i][0] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][1] ^ (*state)[i][2] ; Tm = xtime(Tm);  (*state)[i][1] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][2] ^ (*state)[i][3] ; Tm = xtime(Tm);  (*state)[i][2] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][3] ^ t ; 			 	Tm = xtime(Tm);  (*state)[i][3] ^= Tm ^ Tmp ;
   }
 }
 
@@ -322,16 +324,16 @@ static void InvMixColumns(void)
   for(i=0;i<4;++i)
   { 
   
-    a = state[0][i];
-    b = state[1][i];
-    c = state[2][i];
-    d = state[3][i];
+    a = (*state)[i][0];
+    b = (*state)[i][1];
+    c = (*state)[i][2];
+    d = (*state)[i][3];
 
     
-    state[0][i] = Multiply(a, 0x0e) ^ Multiply(b, 0x0b) ^ Multiply(c, 0x0d) ^ Multiply(d, 0x09);
-    state[1][i] = Multiply(a, 0x09) ^ Multiply(b, 0x0e) ^ Multiply(c, 0x0b) ^ Multiply(d, 0x0d);
-    state[2][i] = Multiply(a, 0x0d) ^ Multiply(b, 0x09) ^ Multiply(c, 0x0e) ^ Multiply(d, 0x0b);
-    state[3][i] = Multiply(a, 0x0b) ^ Multiply(b, 0x0d) ^ Multiply(c, 0x09) ^ Multiply(d, 0x0e);
+    (*state)[i][0] = Multiply(a, 0x0e) ^ Multiply(b, 0x0b) ^ Multiply(c, 0x0d) ^ Multiply(d, 0x09);
+    (*state)[i][1] = Multiply(a, 0x09) ^ Multiply(b, 0x0e) ^ Multiply(c, 0x0b) ^ Multiply(d, 0x0d);
+    (*state)[i][2] = Multiply(a, 0x0d) ^ Multiply(b, 0x09) ^ Multiply(c, 0x0e) ^ Multiply(d, 0x0b);
+    (*state)[i][3] = Multiply(a, 0x0b) ^ Multiply(b, 0x0d) ^ Multiply(c, 0x09) ^ Multiply(d, 0x0e);
   }
 }
 
@@ -345,7 +347,7 @@ static void InvSubBytes(void)
   {
     for(j=0;j<4;++j)
     {
-      state[i][j] = getSBoxInvert(state[i][j]);
+      (*state)[j][i] = getSBoxInvert((*state)[j][i]);
     }
   }
 }
@@ -355,43 +357,44 @@ static void InvShiftRows(void)
   uint8_t temp;
 
   // Rotate first row 1 columns to right  
-  temp=state[1][3];
-  state[1][3]=state[1][2];
-  state[1][2]=state[1][1];
-  state[1][1]=state[1][0];
-  state[1][0]=temp;
+  temp=(*state)[3][1];
+  (*state)[3][1]=(*state)[2][1];
+  (*state)[2][1]=(*state)[1][1];
+  (*state)[1][1]=(*state)[0][1];
+  (*state)[0][1]=temp;
 
   // Rotate second row 2 columns to right 
-  temp=state[2][0];
-  state[2][0]=state[2][2];
-  state[2][2]=temp;
+  temp=(*state)[0][2];
+  (*state)[0][2]=(*state)[2][2];
+  (*state)[2][2]=temp;
 
-  temp=state[2][1];
-  state[2][1]=state[2][3];
-  state[2][3]=temp;
+  temp=(*state)[1][2];
+  (*state)[1][2]=(*state)[3][2];
+  (*state)[3][2]=temp;
 
   // Rotate third row 3 columns to right
-  temp=state[3][0];
-  state[3][0]=state[3][1];
-  state[3][1]=state[3][2];
-  state[3][2]=state[3][3];
-  state[3][3]=temp;
+  temp=(*state)[0][3];
+  (*state)[0][3]=(*state)[1][3];
+  (*state)[1][3]=(*state)[2][3];
+  (*state)[2][3]=(*state)[3][3];
+  (*state)[3][3]=temp;
 }
 
 
 // Cipher is the main function that encrypts the PlainText.
 static void Cipher(void)
 {
-  uint8_t i, j, round = 0;
+  //uint8_t i, j,
+  uint8_t round = 0;
 
   // Copy the input PlainText to state array.
-  for(i = 0; i < 4; ++i)
-  {
-    for(j = 0; j < 4 ; ++j)
-    {
-      state[j][i] = in[(i * 4) + j];
-    }
-  }
+//  for(i = 0; i < 4; ++i)
+//  {
+//    for(j = 0; j < 4 ; ++j)
+//    {
+//      (*state)[i][j] = in[(i * 4) + j];
+//    }
+//  }
 
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(0); 
@@ -415,27 +418,28 @@ static void Cipher(void)
 
   // The encryption process is over.
   // Copy the state array to output array.
-  for(i = 0; i < 4; ++i)
-  {
-    for(j = 0; j < 4; ++j)
-    {
-      out[(i * 4) + j] = state[j][i];
-    }
-  }
+//  for(i = 0; i < 4; ++i)
+//  {
+//    for(j = 0; j < 4; ++j)
+//    {
+//      out[(i * 4) + j] = (*state)[i][j];
+//    }
+//  }
 }
 
 static void InvCipher(void)
 {
-  uint8_t i,j,round=0;
+  //uint8_t i,j,
+  uint8_t round=0;
 
   // Copy the input CipherText to state array.
-  for(i=0;i<4;++i)
-  {
-    for(j=0;j<4;++j)
-    {
-      state[j][i] = in[i*4 + j];
-    }
-  }
+//  for(i=0;i<4;++i)
+//  {
+//    for(j=0;j<4;++j)
+//    {
+//      (*state)[i][j] = in[i*4 + j];
+//    }
+//  }
 
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(Nr); 
@@ -459,13 +463,13 @@ static void InvCipher(void)
 
   // The decryption process is over.
   // Copy the state array to output array.
-  for(i=0;i<4;++i)
-  {
-    for(j=0;j<4;++j)
-    {
-      out[i*4+j]=state[j][i];
-    }
-  }
+//  for(i=0;i<4;++i)
+//  {
+//    for(j=0;j<4;++j)
+//    {
+//      out[i*4+j]=(*state)[i][j];
+//    }
+//  }
 }
 
 
@@ -473,12 +477,11 @@ static void InvCipher(void)
 /* Public functions:                                                         */
 /*****************************************************************************/
 
-void AES128_ECB_encrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
+void AES128_ECB_encrypt_nc(uint8_t* data, const uint8_t* key)
 {
   // Copy the Key and CipherText
   Key = key;
-  in = input;
-  out = output;
+  state = (state_t*)data;
 
   // The KeyExpansion routine must be called before encryption.
   KeyExpansion();
@@ -487,14 +490,28 @@ void AES128_ECB_encrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
   Cipher();
 }
 
-void AES128_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
+void AES128_ECB_decrypt_nc(uint8_t* data, const uint8_t* key)
 {
   Key = key;
-  in = input;
-  out = output;
+  state = (state_t*)data;
 
   KeyExpansion();
 
   InvCipher();
 }
 
+void AES128_ECB_encrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
+{
+  uint8_t i;
+  for (i=0;i<16;++i)
+    output[i] = input[i];
+  AES128_ECB_encrypt_nc(output, key);
+}
+
+void AES128_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t *output)
+{
+  uint8_t i;
+  for (i=0;i<16;++i)
+    output[i] = input[i];
+  AES128_ECB_decrypt_nc(output, key);
+}
