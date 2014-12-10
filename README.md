@@ -24,7 +24,9 @@ GCC size output when compiled for ARM:
     $ arm-none-eabi-gcc -Os -c aes.c
     $ size aes.o
        text    data     bss     dec     hex filename
-       2515       0     204    2719     a9f aes.o
+       2323       0     184    2507     9cb aes.o
+
+
 
 
 .. and when compiling for the THUMB instruction set, we end up around 2K in code size.
@@ -32,7 +34,8 @@ GCC size output when compiled for ARM:
     $ arm-none-eabi-gcc -mthumb -Os -c aes.c
     $ size aes.o
        text    data     bss     dec     hex filename
-       1883       0     204    2087     827 aes.o
+       1775       0     184    1959     7a7 aes.o
+
 
 
 I am using Mentor Graphics free ARM toolchain:
