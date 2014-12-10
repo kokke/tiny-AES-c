@@ -9,7 +9,7 @@ void AES128_ECB_encrypt(uint8_t* input, uint8_t* key, uint8_t* output);
 void AES128_ECB_decrypt(uint8_t* input, uint8_t* key, uint8_t* output);
 ```
 
-The module uses just a bit more than 200 bytes of RAM and 2.5K ROM when compiled for ARM (~2K for Thumb but YMMV).
+The module uses around 200 bytes of RAM and 2.5K ROM when compiled for ARM (~2K for Thumb but YMMV).
 
 It is the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here).
 
