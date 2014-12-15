@@ -71,8 +71,10 @@ static uint8_t RoundKey[176];
 // The Key input to the AES Program
 static const uint8_t* Key;
 
-// Initial Vector used for CBC mode etc.
-static uint8_t* Iv;
+#if defined(CBC) && CBC
+  // Initial Vector used only for CBC mode
+  static uint8_t* Iv;
+#endif
 
 // The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM - 
