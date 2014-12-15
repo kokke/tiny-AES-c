@@ -119,9 +119,9 @@ static void test_decrypt_cbc(void)
   uint8_t buffer[64];
 
   AES128_CBC_decrypt_buffer(buffer+0, in+0,  16, key, iv);
-  AES128_CBC_decrypt_buffer(buffer+16, in+16, 16, key, 0);
-  AES128_CBC_decrypt_buffer(buffer+32, in+32, 16, key, 0);
-  AES128_CBC_decrypt_buffer(buffer+48, in+48, 16, key, 0);
+  AES128_CBC_decrypt_buffer(buffer+16, in+16, 16, 0, 0);
+  AES128_CBC_decrypt_buffer(buffer+32, in+32, 16, 0, 0);
+  AES128_CBC_decrypt_buffer(buffer+48, in+48, 16, 0, 0);
 
   printf("CBC decrypt: ");
 
