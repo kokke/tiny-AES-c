@@ -21,11 +21,11 @@ It is the smallest implementation in C I've seen yet, but do contact me if you k
 I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
 
 
-GCC size output when compiled for ARM:
+GCC size output when ECB mode is compiled for ARM:
 
 
 
-    $ arm-none-eabi-gcc -Os -c aes.c
+    $ arm-none-eabi-gcc -Os -c aes.c -DCBC=0
     $ size aes.o
        text    data     bss     dec     hex filename
        2323       0     184    2507     9cb aes.o
@@ -35,7 +35,7 @@ GCC size output when compiled for ARM:
 
 .. and when compiling for the THUMB instruction set, we end up around 2K in code size.
 
-    $ arm-none-eabi-gcc -mthumb -Os -c aes.c
+    $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0
     $ size aes.o
        text    data     bss     dec     hex filename
        1775       0     184    1959     7a7 aes.o
