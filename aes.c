@@ -443,6 +443,14 @@ static void BlockCopy(uint8_t* output, uint8_t* input)
   }
 }
 
+static void FragmentCopy(uint8_t* output, uint8_t* input, uint8_t len)
+{
+  uint8_t i;
+  for (i=0;i<len;++i)
+  {
+    output[i] = input[i];
+  }
+}
 
 
 /*****************************************************************************/
@@ -499,7 +507,8 @@ static void XorWithIv(uint8_t* buf)
 void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
 {
   intptr_t i;
-  uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
+  const intptr_t full_blocks = length / KEYLEN;
+  const uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
 
   BlockCopy(output, input);
   state = (state_t*)output;
@@ -516,10 +525,10 @@ void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
     Iv = (uint8_t*)iv;
   }
 
-  for(i = 0; i < length; i += KEYLEN)
+  for(i = 0; i < full_blocks; ++i)
   {
-    XorWithIv(input);
     BlockCopy(output, input);
+    XorWithIv(output);
     state = (state_t*)output;
     Cipher();
     Iv = output;
@@ -529,8 +538,9 @@ void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
   if(remainders)
   {
-    BlockCopy(output, input);
+    FragmentCopy(output, input, remainders);
     memset(output + remainders, 0, KEYLEN - remainders); /* add 0-padding */
+    XorWithIv(output);
     state = (state_t*)output;
     Cipher();
   }
@@ -539,7 +549,8 @@ void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
 {
   intptr_t i;
-  uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
+  const intptr_t full_blocks = length / KEYLEN;
+  const uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
   
   BlockCopy(output, input);
   state = (state_t*)output;
@@ -557,7 +568,7 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
     Iv = (uint8_t*)iv;
   }
 
-  for(i = 0; i < length; i += KEYLEN)
+  for(i = 0; i < full_blocks; ++i)
   {
     BlockCopy(output, input);
     state = (state_t*)output;
@@ -570,7 +581,7 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
   if(remainders)
   {
-    BlockCopy(output, input);
+    FragmentCopy(output, input, remainders);
     memset(output+remainders, 0, KEYLEN - remainders); /* add 0-padding */
     state = (state_t*)output;
     InvCipher();
