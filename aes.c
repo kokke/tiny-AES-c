@@ -518,8 +518,8 @@ void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
   for(i = KEYLEN; i <= length; i += KEYLEN)
   {
-    XorWithIv(input);
     BlockCopy(output, input);
+    XorWithIv(output);
     state = (state_t*)output;
     Cipher();
     Iv = output;
