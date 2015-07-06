@@ -501,9 +501,6 @@ void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
   uintptr_t i;
   uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
 
-  BlockCopy(output, input);
-  state = (state_t*)output;
-
   // Skip the key expansion if key is passed as 0
   if(0 != key)
   {
@@ -542,9 +539,6 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
   uintptr_t i;
   uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
   
-  BlockCopy(output, input);
-  state = (state_t*)output;
-
   // Skip the key expansion if key is passed as 0
   if(0 != key)
   {
