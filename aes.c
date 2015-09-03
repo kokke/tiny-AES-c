@@ -436,11 +436,7 @@ static void InvCipher(void)
 
 static void BlockCopy(uint8_t* output, uint8_t* input)
 {
-  uint8_t i;
-  for (i=0;i<KEYLEN;++i)
-  {
-    output[i] = input[i];
-  }
+  memcpy(output, input, KEYLEN);
 }
 
 
