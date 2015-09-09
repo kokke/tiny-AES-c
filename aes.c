@@ -53,10 +53,16 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 // jcallan@github points out that declaring Multiply as a function 
 // reduces code size considerably with the Keil ARM compiler.
 // See this link for more information: https://github.com/kokke/tiny-AES128-C/pull/3
+// Use it with care as with GCC 4.9 on a Cortex-M3 setting this caused slow down
+// of decryption by a factor of 6.
 #ifndef MULTIPLY_AS_A_FUNCTION
   #define MULTIPLY_AS_A_FUNCTION 0
 #endif
 
+// Setting this may improve performance a bit with negligible effect on code size
+#ifndef XTIME_AS_A_MACRO
+  #define XTIME_AS_A_MACRO 0
+#endif
 
 /*****************************************************************************/
 /* Private variables:                                                        */
@@ -277,10 +283,14 @@ static void ShiftRows(void)
   (*state)[1][3] = temp;
 }
 
+#if XTIME_AS_A_MACRO
 static uint8_t xtime(uint8_t x)
 {
   return ((x<<1) ^ (((x>>7) & 1) * 0x1b));
 }
+#else
+#define xtime(x) ((x<<1) ^ (((x>>7) & 1) * 0x1b))
+#endif
 
 // MixColumns function mixes the columns of the state matrix
 static void MixColumns(void)
