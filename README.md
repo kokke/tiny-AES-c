@@ -1,6 +1,7 @@
 ### Tiny AES128 in C
 
 This is a small and portable implementation of the AES128 ECB and CBC encryption algorithms written in C.
+
 This is meant to be the back-end of whatever error checking you need to validate your input.
 There is no built-in protection for buffer overflows if malicious input is given, or the size of buffers are not chosen carefully.
 
