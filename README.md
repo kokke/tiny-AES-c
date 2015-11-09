@@ -2,8 +2,7 @@
 
 This is a small and portable implementation of the AES128 ECB and CBC encryption algorithms written in C.
 
-This is meant to be the back-end of whatever error checking you need to validate your input.
-There is no built-in protection for buffer overflows if malicious input is given, or the size of buffers are not chosen carefully.
+There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input.
 
 The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
