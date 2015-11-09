@@ -17,7 +17,7 @@ You can choose to use one or both of the modes-of-operation, by defining the sym
 
 The module uses around 200 bytes of RAM and 2.5K ROM when compiled for ARM (~2K for Thumb but YMMV).
 
-It is the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here).
+It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). I am a bit slow to react to pull requests and issues, but I have an ambition to go through all issues sometime in the future and release a stable version.
 
 
 I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
