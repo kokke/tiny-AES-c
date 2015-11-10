@@ -2,8 +2,6 @@
 
 This is a small and portable implementation of the AES128 ECB and CBC encryption algorithms written in C.
 
-There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input.
-
 The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
 ```C
@@ -15,10 +13,11 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
 You can choose to use one or both of the modes-of-operation, by defining the symbols CBC and ECB. See the header file for clarification.
 
+There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input. The two functions AES128_ECB_xxcrypt() do most of the work, and they expect inputs of 128 bit length.
+
 The module uses around 200 bytes of RAM and 2.5K ROM when compiled for ARM (~2K for Thumb but YMMV).
 
-It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). I am a bit slow to react to pull requests and issues, but I have an ambition to go through all issues sometime in the future and release a stable version.
-
+It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
 
 I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
 
@@ -63,3 +62,4 @@ This implementation is verified against the data in:
 
 All material in this repository is in the public domain.
 
+I am a bit slow to react to pull requests and issues, but I have an ambition to go through all issues sometime in the future and release a stable version.
