@@ -581,10 +581,11 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 #endif // #if defined(CBC) && CBC
 
 void LeftShift1Bit(uint8_t* buffer) {
-    uint8_t i, carry = 0;
-    for (i = KEYLEN - 1; i > 0; --i) {
+    uint8_t carry = 0;
+    int8_t i;
+    for (i = KEYLEN - 1 ; i >= 0; --i) {
         uint8_t cc = carry;
-        carry = buffer[i] & 0x80;
+        carry = (buffer[i] & 0x80) != 0;
         buffer[i] = (buffer[i] << 1) + cc;
     }
 }
@@ -599,13 +600,14 @@ void AES128_CMAC_generate_subkey(uint8_t* K1, uint8_t* K2, const uint8_t* key)
     memset(input, 0, KEYLEN);
 
     AES128_CBC_encrypt_buffer(L, input, KEYLEN, key, zero);  /* init vector zero */
-    LeftShift1Bit(L);
     memcpy(K1, L, KEYLEN);
-    if (K1[0] & 0x80) {  /* MSB zero*/
+    LeftShift1Bit(K1);
+    if (L[0] & 0x80) {  /* MSB zero*/
         for( i = 0; i < KEYLEN; ++i)
             K1[i] ^= Rb[i];
     }
     memcpy(K2, K1, KEYLEN);
+    LeftShift1Bit(K2);
     if (K1[0] & 0x80) {
         for(i = 0; i < KEYLEN; ++i)
             K2[i] ^= Rb[i];
