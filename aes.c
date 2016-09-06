@@ -580,4 +580,72 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
 #endif // #if defined(CBC) && CBC
 
+void LeftShift1Bit(uint8_t* buffer) {
+    uint8_t i, carry = 0;
+    for (i = KEYLEN - 1; i > 0; --i) {
+        uint8_t cc = carry;
+        carry = buffer[i] & 0x80;
+        buffer[i] = (buffer[i] << 1) + cc;
+    }
+}
 
+static const uint8_t zero[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+void AES128_CMAC_generate_subkey(uint8_t* K1, uint8_t* K2, const uint8_t* key)
+{
+    static const uint8_t Rb[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x87};
+
+    uint8_t i, L[KEYLEN], input[KEYLEN];
+    memset(input, 0, KEYLEN);
+
+    AES128_CBC_encrypt_buffer(L, input, KEYLEN, key, zero);  /* init vector zero */
+    LeftShift1Bit(L);
+    memcpy(K1, L, KEYLEN);
+    if (K1[0] & 0x80) {  /* MSB zero*/
+        for( i = 0; i < KEYLEN; ++i)
+            K1[i] ^= Rb[i];
+    }
+    memcpy(K2, K1, KEYLEN);
+    if (K1[0] & 0x80) {
+        for(i = 0; i < KEYLEN; ++i)
+            K2[i] ^= Rb[i];
+    }
+}
+
+void AES128_CMAC(uint8_t* mac, uint8_t* message, uint32_t msgLen, uint8_t* key){
+    uint8_t K1[KEYLEN], K2[KEYLEN], mLast[KEYLEN], i;
+
+    AES128_CMAC_generate_subkey(K1, K2, key);
+    uint32_t nrBlocks = msgLen/KEYLEN + (msgLen % KEYLEN != 0); /*ceil(msgLen / KEYLEN)*/
+    if (nrBlocks == 0) {
+        nrBlocks = 1;
+    }
+    uint8_t lastIdx = msgLen % KEYLEN;
+    if (lastIdx) { /* pad the last block */
+        memcpy(mLast, message + nrBlocks * KEYLEN, lastIdx);
+        mLast[lastIdx] = 0x80;
+        memset(mLast + lastIdx, 0, KEYLEN - lastIdx);
+        for (i = 0; i < KEYLEN; ++i) {
+            mLast[i] ^= K2[i];
+        }
+    }
+    else { /* no padding necessary */
+        memcpy(mLast, message + msgLen - KEYLEN, KEYLEN);
+        for (i = 0; i < KEYLEN; ++i) {
+            mLast[i] ^= K1[i];
+        }
+    }
+    uint8_t X[KEYLEN], Y[KEYLEN];
+    memset(X, 0, KEYLEN);
+    uint32_t j;
+    for (j = 0; j < nrBlocks - 1; ++j) {
+        for (i = 0; i < KEYLEN; ++i) {
+            Y[i] = X[i] ^ message[j *  KEYLEN + i];
+        }
+        AES128_CBC_encrypt_buffer(X, Y, KEYLEN, key, zero);
+    }
+    for (i = 0; i < KEYLEN; ++i) {
+        Y[i] = X[i] ^ mLast[i];
+    }
+    AES128_CBC_encrypt_buffer(mac, Y, KEYLEN, key, zero);
+}
