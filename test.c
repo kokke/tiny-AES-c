@@ -15,7 +15,7 @@ static void test_decrypt_ecb(void);
 static void test_encrypt_ecb_verbose(void);
 static void test_encrypt_cbc(void);
 static void test_decrypt_cbc(void);
-
+static void test_aes_cmac(void);
 
 
 int main(void)
@@ -25,7 +25,8 @@ int main(void)
     test_decrypt_ecb();
     test_encrypt_ecb();
     test_encrypt_ecb_verbose();
-    
+    test_aes_cmac();
+
     return 0;
 }
 
@@ -185,4 +186,12 @@ static void test_decrypt_ecb(void)
   }
 }
 
-
+static void test_aes_cmac(void)
+{
+  uint8_t key[] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
+  uint8_t msg0[] = {};
+  uint8_t cmac[16];
+  AES128_CMAC(cmac, msg0, 0, key);
+  printf("AES-CMAC empty string:\n");
+  phex(cmac);
+}
