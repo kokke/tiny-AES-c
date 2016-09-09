@@ -40,6 +40,7 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
 #if defined(CMAC) && CMAC
 
+void AES128_CBC_encrypt_block(uint8_t* output, uint8_t* input, const uint8_t* key);
 void AES128_CMAC(uint8_t* mac, uint8_t* message, uint32_t msgLen, uint8_t* key);
 
 #endif // #if defined(CMAC) && CMAC

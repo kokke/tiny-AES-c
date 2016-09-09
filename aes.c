@@ -580,6 +580,22 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
 #endif // #if defined(CBC) && CBC
 
+/* this is essentially a simplified version of AES128_CBC_encrypt_buffer */
+/* simplified with an iv of all zeros and length equal to KEYLEN */
+void AES128_CBC_encrypt_block(uint8_t* output, uint8_t* input, const uint8_t* key)
+{
+  // Skip the key expansion if key is passed as 0
+  if(0 != key)
+  {
+    Key = key;
+    KeyExpansion();
+  }
+
+  BlockCopy(output, input);
+  state = (state_t*)output;
+  Cipher();
+}
+
 void LeftShift1Bit(uint8_t* buffer) {
     uint8_t carry = 0;
     int8_t i;
@@ -590,16 +606,14 @@ void LeftShift1Bit(uint8_t* buffer) {
     }
 }
 
-static const uint8_t zero[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
 void AES128_CMAC_generate_subkey(uint8_t* K1, uint8_t* K2, const uint8_t* key)
 {
     static const uint8_t Rb15 = 0x87;
 
-    uint8_t i, L[KEYLEN], input[KEYLEN];
+    uint8_t L[KEYLEN], input[KEYLEN];
     memset(input, 0, KEYLEN);
 
-    AES128_CBC_encrypt_buffer(L, input, KEYLEN, key, zero);  /* init vector zero */
+    AES128_CBC_encrypt_block(L, input, key);
     memcpy(K1, L, KEYLEN);
     LeftShift1Bit(K1);
     if (L[0] & 0x80) {  /* MSB zero*/
@@ -647,10 +661,10 @@ void AES128_CMAC(uint8_t* mac, uint8_t* message, uint32_t msgLen, uint8_t* key){
         for (i = 0; i < KEYLEN; ++i) {
             Y[i] = X[i] ^ message[j *  KEYLEN + i];
         }
-        AES128_CBC_encrypt_buffer(X, Y, KEYLEN, key, zero);
+        AES128_CBC_encrypt_block(X, Y, key);
     }
     for (i = 0; i < KEYLEN; ++i) {
         Y[i] = X[i] ^ mLast[i];
     }
-    AES128_CBC_encrypt_buffer(mac, Y, KEYLEN, key, zero);
+    AES128_CBC_encrypt_block(mac, Y, key);
 }
