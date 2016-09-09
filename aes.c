@@ -631,19 +631,19 @@ void AES128_CMAC(uint8_t* mac, uint8_t* message, uint32_t msgLen, uint8_t* key){
 
     AES128_CMAC_generate_subkey(K1, K2, key);
     uint32_t nrBlocks = msgLen/KEYLEN + (msgLen % KEYLEN != 0); /*ceil(msgLen / KEYLEN)*/
-    uint8_t padFlag, lastIdx = msgLen % KEYLEN;
+    uint8_t padFlag, remainders = msgLen % KEYLEN;
 
     if (nrBlocks == 0) {
         nrBlocks = 1;
         padFlag = 1;
     }
     else {
-        padFlag = lastIdx;
+        padFlag = remainders;
     }
     if (padFlag) { /* pad the last block */
-        memcpy(mLast, message + (nrBlocks - 1) * KEYLEN, lastIdx);
-        mLast[lastIdx] = 0x80;
-        memset(mLast + lastIdx + 1, 0, KEYLEN - lastIdx - 1);
+        memcpy(mLast, message + (nrBlocks - 1) * KEYLEN, remainders);
+        mLast[remainders] = 0x80;
+        memset(mLast + remainders + 1, 0, KEYLEN - remainders - 1);
         for (i = 0; i < KEYLEN; ++i) {
             mLast[i] ^= K2[i];
         }
