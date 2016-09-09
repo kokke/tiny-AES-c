@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  #define the macros below to 1/0 to enable/disable the mode of operation.
@@ -37,5 +40,9 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 #endif /* #if defined(CBC) && CBC */
 
 
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _AES_H_ */
