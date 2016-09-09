@@ -594,7 +594,7 @@ static const uint8_t zero[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 void AES128_CMAC_generate_subkey(uint8_t* K1, uint8_t* K2, const uint8_t* key)
 {
-    static const uint8_t Rb[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x87};
+    static const uint8_t Rb15 = 0x87;
 
     uint8_t i, L[KEYLEN], input[KEYLEN];
     memset(input, 0, KEYLEN);
@@ -603,14 +603,12 @@ void AES128_CMAC_generate_subkey(uint8_t* K1, uint8_t* K2, const uint8_t* key)
     memcpy(K1, L, KEYLEN);
     LeftShift1Bit(K1);
     if (L[0] & 0x80) {  /* MSB zero*/
-        for( i = 0; i < KEYLEN; ++i)
-            K1[i] ^= Rb[i];
+        K1[15] ^= Rb15;
     }
     memcpy(K2, K1, KEYLEN);
     LeftShift1Bit(K2);
     if (K1[0] & 0x80) {
-        for(i = 0; i < KEYLEN; ++i)
-            K2[i] ^= Rb[i];
+        K2[15] ^= Rb15;
     }
 }
 
