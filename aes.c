@@ -35,7 +35,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 /*****************************************************************************/
 
 #include <stdint.h>
-#include <string.h> /* CBC mode, for memset */
+#include <string.h> /* for memcpy and memset */
 #include "aes.h"
 
 
@@ -60,6 +60,8 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 #ifndef MULTIPLY_AS_A_FUNCTION
   #define MULTIPLY_AS_A_FUNCTION 0
 #endif
+
+#define BlockCopy(output, intput) memcpy(output, input, KEYLEN)
 
 
 /*****************************************************************************/
@@ -461,15 +463,6 @@ static void InvCipher(void)
   InvShiftRows();
   InvSubBytes();
   AddRoundKey(0);
-}
-
-static void BlockCopy(uint8_t* output, const uint8_t* input)
-{
-  uint8_t i;
-  for (i=0;i<KEYLEN;++i)
-  {
-    output[i] = input[i];
-  }
 }
 
 
