@@ -98,6 +98,9 @@ static const uint8_t sbox[256] =   {
   0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
   0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 };
 
+// AES Decryption algorithm is only required for ECB/CBC, not CTR
+#if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
+
 static const uint8_t rsbox[256] =
 { 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
   0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
@@ -116,6 +119,7 @@ static const uint8_t rsbox[256] =
   0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
   0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d };
 
+#endif // #if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
 
 // The round constant word array, Rcon[i], contains the values given by 
 // x to th e power (i-1) being powers of x (x is denoted as {02}) in the field GF(2^8)
@@ -147,10 +151,15 @@ static uint8_t getSBoxValue(uint8_t num)
   return sbox[num];
 }
 
+// AES Decryption algorithm is only required for ECB/CBC, not CTR
+#if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
+
 static uint8_t getSBoxInvert(uint8_t num)
 {
   return rsbox[num];
 }
+
+#endif // #if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
 
 // This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states. 
 static void KeyExpansion(void)
@@ -318,6 +327,9 @@ static uint8_t Multiply(uint8_t x, uint8_t y)
 
 #endif
 
+// AES Decryption algorithm is only required for ECB/CBC, not CTR
+#if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
+
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
@@ -382,6 +394,8 @@ static void InvShiftRows(void)
   (*state)[3][3]=temp;
 }
 
+#endif // #if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
+
 
 // Cipher is the main function that encrypts the PlainText.
 static void Cipher(void)
@@ -409,6 +423,9 @@ static void Cipher(void)
   AddRoundKey(Nr);
 }
 
+// AES Decryption algorithm is only required for ECB/CBC, not CTR
+#if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
+
 static void InvCipher(void)
 {
   uint8_t round=0;
@@ -433,6 +450,8 @@ static void InvCipher(void)
   InvSubBytes();
   AddRoundKey(0);
 }
+
+#endif // #if ( defined(CBC) && CBC ) || ( defined(ECB) && ECB )
 
 static void BlockCopy(uint8_t* output, const uint8_t* input)
 {
