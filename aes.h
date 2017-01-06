@@ -8,6 +8,7 @@
 //
 // CBC enables AES128 encryption in CBC-mode of operation and handles 0-padding.
 // ECB enables the basic ECB 16-byte block algorithm. Both can be enabled simultaneously.
+// CTR enables AES128 encryption in CTR-mode of operation
 
 // The #ifndef-guard allows it to be configured before #include'ing or at compile time.
 #ifndef CBC
@@ -16,6 +17,10 @@
 
 #ifndef ECB
   #define ECB 1
+#endif
+
+#ifndef CTR
+  #define CTR 1
 #endif
 
 
@@ -34,6 +39,14 @@ void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 
 #endif // #if defined(CBC) && CBC
+
+
+#if defined(CTR) && CTR
+
+// Encryption and decryption in CTR mode are exactly identical
+void AES128_CTR_process_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
+
+#endif // #if defined(CTR) && CTR
 
 
 

@@ -581,3 +581,18 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 #endif // #if defined(CBC) && CBC
 
 
+
+
+
+#if defined(CTR) && CTR
+
+
+void AES128_CTR_process_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
+{
+
+}
+
+
+#endif // #if defined(CTR) && CTR
+
+
