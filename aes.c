@@ -434,7 +434,7 @@ static void InvCipher(void)
   AddRoundKey(0);
 }
 
-static void BlockCopy(uint8_t* output, uint8_t* input)
+static void BlockCopy(uint8_t* output, const uint8_t* input)
 {
   uint8_t i;
   for (i=0;i<KEYLEN;++i)
@@ -589,7 +589,34 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 
 void AES128_CTR_process_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
 {
-
+    uint32_t i = 0;
+    uint8_t buffer[KEYLEN], ctr[KEYLEN], j;
+    
+    BlockCopy(ctr, iv);
+    Key = key;
+    KeyExpansion();
+    
+    while (i < length)
+    {
+        if ((i & 0x0000000F) == 0)
+        {
+            BlockCopy(buffer, ctr);
+            state = (state_t *) buffer;
+            Cipher();
+            
+            for (j = KEYLEN - 1; j >= 0; --j) {
+			    ++(ctr[j]);
+			
+			    if (ctr[j])
+			    {
+				    break;
+	            }
+		    }
+        }
+        
+        output[i] = (input[i]) ^ (buffer[i & 0x0000000F]);
+        ++i;
+    }
 }
 
 
