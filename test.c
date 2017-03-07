@@ -90,7 +90,7 @@ static void test_encrypt_ecb(void)
 
   AES128_ECB_encrypt(in, key, buffer);
 
-  printf("ECB decrypt: ");
+  printf("ECB encrypt: ");
 
   if(0 == memcmp((char*) out, (char*) buffer, 16))
   {
