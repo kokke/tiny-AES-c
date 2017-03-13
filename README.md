@@ -62,4 +62,4 @@ This implementation is verified against the data in:
 
 All material in this repository is in the public domain.
 
-I am a bit slow to react to pull requests and issues, but I have an ambition to go through all issues sometime in the future and release a stable version.
+I am a bit slow to react to pull requests and issues, but I have an ambition to go through all issues sometime in the future and release an API-stable version.
