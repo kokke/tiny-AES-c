@@ -299,24 +299,26 @@ static void MixColumns(void)
 }
 
 // Multiply is used to multiply numbers in the field GF(2^8)
-#if MULTIPLY_AS_A_FUNCTION
-static uint8_t Multiply(uint8_t x, uint8_t y)
-{
-  return (((y & 1) * x) ^
-       ((y>>1 & 1) * xtime(x)) ^
-       ((y>>2 & 1) * xtime(xtime(x))) ^
-       ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
-       ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))));
+static uint8_t Multiply(uint8_t x, uint8_t y){
+  uint8_t answer;
+  if (y == 1) {
+      answer = x;
+      return answer;
+  } else if (y%2 > 0){
+      y -= 1;
+      answer = RecursiveMultiply(x, y);
+      answer ^= x;
+      return answer;
+  } else if (y >= 2){
+      y /= 2;
+      answer = RecursiveMultiply(x, y);
+      uint8_t ffcheck;
+      ffcheck = (unsigned char)((signed char)answer >> 7);
+      answer = answer << 1;
+      answer ^= 0x1B & ffcheck;
+      return answer;
   }
-#else
-#define Multiply(x, y)                                \
-      (  ((y & 1) * x) ^                              \
-      ((y>>1 & 1) * xtime(x)) ^                       \
-      ((y>>2 & 1) * xtime(xtime(x))) ^                \
-      ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^         \
-      ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))   \
-
-#endif
+}
 
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
