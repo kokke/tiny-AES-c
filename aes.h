@@ -20,20 +20,20 @@
 
 
 
-#if defined(ECB) && ECB
+#if ECB
 
 void AES128_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t *output);
 void AES128_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output);
 
-#endif // #if defined(ECB) && ECB
+#endif // #if ECB
 
 
-#if defined(CBC) && CBC
+#if CBC
 
 void AES128_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 
-#endif // #if defined(CBC) && CBC
+#endif // #if CBC
 
 
 
