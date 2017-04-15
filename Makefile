@@ -3,6 +3,8 @@
 #OBJCOPY      = avr-objcopy
 CC           = gcc
 CFLAGS       = -Wall -Os -Wl,-Map,test.map
+#CFLAGS       = -Wall -Os 
+CFLAGS 		+= -DCBC=1 -DECB=1
 OBJCOPY      = objcopy
 
 # include path to AVR library
@@ -33,8 +35,17 @@ test.out : aes.o test.o
 small: test.out
 	$(OBJCOPY) -j .text -O ihex test.out rom.hex
 
-clean:
-	rm -f *.OBJ *.LST *.o *.gch *.out *.hex *.map
-
 lint:
 	$(call SPLINT)
+
+aes128cbc.o: aes.o aes128cbc.c
+	$(CC) $(CFLAGS) -c aes128cbc.c -o aes128cbc.o
+
+cbcapp.o: aes128cbc.o cbcapp.c
+	$(CC) $(CFLAGS) -c cbcapp.c -o cbcapp.o
+
+cbcapp: cbcapp.o
+	$(CC) $(CFLAGS) aes.o aes128cbc.o cbcapp.o -o $@
+
+clean:
+	rm -f *.OBJ *.LST *.o *.gch *.out *.hex *.map cbcapp
