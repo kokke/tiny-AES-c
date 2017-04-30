@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 		goto CLEANUP;
 
 	//try to open input file
-	in_f = fopen(params.input_filename, "r");
+	in_f = fopen(params.input_filename, "rb");
 	if(in_f == NULL){
 		fprintf(stderr, "Could not open input file\n");
 		status = -EPERM;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 	}
 
 	//Try to open output file
-	out_f = fopen(params.output_filename, "w");
+	out_f = fopen(params.output_filename, "wb");
 	if(out_f == NULL){
 		fprintf(stderr, "Could not open output file\n");
 		status = -EPERM;
