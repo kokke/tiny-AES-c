@@ -1,11 +1,15 @@
+
+# ac49x
+#CROSS_COMPILE=/opt/codefidence/bin/mipsel-linux-
+
 #CC           = avr-gcc
 #CFLAGS       = -Wall -mmcu=atmega16 -Os -Wl,-Map,test.map
 #OBJCOPY      = avr-objcopy
-CC           = gcc
+CC           = $(CROSS_COMPILE)gcc
 CFLAGS       = -Wall -Os -Wl,-Map,test.map
 #CFLAGS       = -Wall -Os 
 CFLAGS 		+= -DCBC=1 -DECB=1
-OBJCOPY      = objcopy
+OBJCOPY      = $(CROSS_COMPILE)objcopy
 
 # include path to AVR library
 INCLUDE_PATH = /usr/lib/avr/include
@@ -15,8 +19,9 @@ SPLINT       = splint test.c aes.c -I$(INCLUDE_PATH) +charindex -unrecog
 .SILENT:
 .PHONY:  lint clean
 
+all: test.out cbcapp.out
 
-rom.hex : test.out
+rom.hex : test.out 
 	# copy object-code to new image and format in hex
 	$(OBJCOPY) -j .text -O ihex test.out rom.hex
 
@@ -44,8 +49,8 @@ aes128cbc.o: aes.o aes128cbc.c
 cbcapp.o: aes128cbc.o cbcapp.c
 	$(CC) $(CFLAGS) -c cbcapp.c -o cbcapp.o
 
-cbcapp: cbcapp.o
+cbcapp.out: cbcapp.o
 	$(CC) $(CFLAGS) aes.o aes128cbc.o cbcapp.o -o $@
 
 clean:
-	rm -f *.OBJ *.LST *.o *.gch *.out *.hex *.map cbcapp
+	rm -f *.OBJ *.LST *.o *.gch *.out *.hex *.map
