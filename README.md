@@ -1,6 +1,6 @@
 ### Tiny AES in C
 
-This is a small and portable implementation of the AES128 ECB and CBC encryption algorithms written in C.
+This is a small and portable implementation of the AES ECB and CBC encryption algorithms written in C.
 
 The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
