@@ -503,9 +503,9 @@ static void XorWithIv(uint8_t* buf)
 void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
 {
   uintptr_t i;
-  uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
+  uint8_t extra = length % 16; /* Remaining bytes in the last non-full block */
 
-  memcpy(output, input, KEYLEN);
+  memcpy(output, input, 16);
   state = (state_t*)output;
 
   // Skip the key expansion if key is passed as 0
@@ -520,21 +520,22 @@ void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
     Iv = (uint8_t*)iv;
   }
 
-  for(i = 0; i < length-remainders; i += KEYLEN)
+  for(i = 0; i < length; i += 16)
   {
     XorWithIv(input);
-    memcpy(output, input, KEYLEN);
+    memcpy(output, input, 16);
     state = (state_t*)output;
     Cipher();
     Iv = output;
-    input += KEYLEN;
-    output += KEYLEN;
+    input += 16;
+    output += 16;
+    //printf("Step %d - %d", i/16, i);
   }
 
-  if(remainders)
+  if(extra)
   {
-    memcpy(output, input, remainders);
-    //memset(output + remainders, 0, KEYLEN - remainders); /* add 0-padding */
+    printf("NONO\n");
+    memcpy(output, input, extra);
     state = (state_t*)output;
     Cipher();
   }
@@ -543,11 +544,11 @@ void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
 void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
 {
   uintptr_t i;
-  uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
-  
-  memcpy(output, input, KEYLEN);
-  state = (state_t*)output;
+  uint8_t extra = length % 16; /* Remaining bytes in the last non-full block */
 
+  memcpy(output, input, 16);
+  state = (state_t*)output;
+  
   // Skip the key expansion if key is passed as 0
   if(0 != key)
   {
@@ -561,21 +562,20 @@ void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
     Iv = (uint8_t*)iv;
   }
 
-  for(i = 0; i < length; i += KEYLEN)
+  for(i = 0; i < length; i += 16)
   {
-    memcpy(output, input, KEYLEN);
+    memcpy(output, input, 16);
     state = (state_t*)output;
     InvCipher();
     XorWithIv(output);
     Iv = input;
-    input += KEYLEN;
-    output += KEYLEN;
+    input += 16;
+    output += 16;
   }
 
-  if(remainders)
+  if(extra)
   {
-    memcpy(output, input, KEYLEN);
-    memset(output+remainders, 0, KEYLEN - remainders); /* add 0-padding */
+    memcpy(output, input, extra);
     state = (state_t*)output;
     InvCipher();
   }
