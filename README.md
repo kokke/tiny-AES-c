@@ -14,7 +14,7 @@ You can choose to use the standard 128b key or 192/256b by defining the symbols 
 
 You can choose to use one or both of the modes-of-operation, by defining the symbols CBC and ECB. See the header file for clarification.
 
-There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input. The two functions AES128_ECB_xxcrypt() do most of the work, and they expect inputs of 128 bit length.
+There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input. The two functions AES_ECB_xxcrypt() do most of the work, and they expect inputs of 128 bit length.
 
 The module uses around 200 bytes of RAM and 2.5K ROM when compiled for ARM (~2K for Thumb but YMMV).
 
