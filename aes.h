@@ -18,13 +18,12 @@
   #define ECB 1
 #endif
 
-#define AES128
-
+#define AES256
 
 #if defined(ECB) && ECB
 
-void AES_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t *output);
-void AES_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output);
+void AES_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t *output, const uint32_t length);
+void AES_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output, const uint32_t length);
 
 #endif // #if defined(ECB) && ECB
 
