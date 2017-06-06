@@ -42,6 +42,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 /*****************************************************************************/
 // The number of columns comprising a state in AES. This is a constant in AES. Value=4
 #define Nb 4
+#define BLOCKLEN 16 //Block length in bytes AES is 128b block only
 
 #ifdef AES256
     #define Nk 8
@@ -177,7 +178,7 @@ static void KeyExpansion(void)
 
   // All other round keys are found from the previous round keys.
   //i == Nk
-  for(i = Nk; i < Nb * (Nr + 1); ++i)
+  for(; i < Nb * (Nr + 1); ++i)
   {
     {
       tempa[0]=RoundKey[(i-1) * 4 + 0];
@@ -448,16 +449,6 @@ static void InvCipher(void)
   AddRoundKey(0);
 }
 
-static void BlockCopy(uint8_t* output, const uint8_t* input)
-{
-  uint8_t i;
-  for (i=0;i<KEYLEN;++i)
-  {
-    output[i] = input[i];
-  }
-}
-
-
 
 /*****************************************************************************/
 /* Public functions:                                                         */
@@ -465,10 +456,10 @@ static void BlockCopy(uint8_t* output, const uint8_t* input)
 #if defined(ECB) && ECB
 
 
-void AES_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t* output)
+void AES_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t* output, const uint32_t length)
 {
   // Copy input to output, and work in-memory on output
-  BlockCopy(output, input);
+  memcpy(output, input, length);
   state = (state_t*)output;
 
   Key = key;
@@ -478,10 +469,10 @@ void AES_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t* output)
   Cipher();
 }
 
-void AES_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output)
+void AES_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output, const uint32_t length)
 {
   // Copy input to output, and work in-memory on output
-  BlockCopy(output, input);
+  memcpy(output, input, length);
   state = (state_t*)output;
 
   // The KeyExpansion routine must be called before encryption.
@@ -504,7 +495,7 @@ void AES_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output)
 static void XorWithIv(uint8_t* buf)
 {
   uint8_t i;
-  for(i = 0; i < KEYLEN; ++i)
+  for(i = 0; i < BLOCKLEN; ++i) //WAS for(i = 0; i < KEYLEN; ++i) but the block in AES is always 128bit so 16 bytes!
   {
     buf[i] ^= Iv[i];
   }
@@ -513,9 +504,9 @@ static void XorWithIv(uint8_t* buf)
 void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
 {
   uintptr_t i;
-  uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
+  uint8_t extra = length % BLOCKLEN; /* Remaining bytes in the last non-full block */
 
-  BlockCopy(output, input);
+  memcpy(output, input, BLOCKLEN);
   state = (state_t*)output;
 
   // Skip the key expansion if key is passed as 0
@@ -530,21 +521,21 @@ void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
     Iv = (uint8_t*)iv;
   }
 
-  for(i = 0; i < length; i += KEYLEN)
+  for(i = 0; i < length; i += BLOCKLEN)
   {
     XorWithIv(input);
-    BlockCopy(output, input);
+    memcpy(output, input, BLOCKLEN);
     state = (state_t*)output;
     Cipher();
     Iv = output;
-    input += KEYLEN;
-    output += KEYLEN;
+    input += BLOCKLEN;
+    output += BLOCKLEN;
+    //printf("Step %d - %d", i/16, i);
   }
 
-  if(remainders)
+  if(extra)
   {
-    BlockCopy(output, input);
-    memset(output + remainders, 0, KEYLEN - remainders); /* add 0-padding */
+    memcpy(output, input, extra);
     state = (state_t*)output;
     Cipher();
   }
@@ -553,11 +544,11 @@ void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
 void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
 {
   uintptr_t i;
-  uint8_t remainders = length % KEYLEN; /* Remaining bytes in the last non-full block */
-  
-  BlockCopy(output, input);
-  state = (state_t*)output;
+  uint8_t extra = length % BLOCKLEN; /* Remaining bytes in the last non-full block */
 
+  memcpy(output, input, BLOCKLEN);
+  state = (state_t*)output;
+  
   // Skip the key expansion if key is passed as 0
   if(0 != key)
   {
@@ -571,21 +562,20 @@ void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
     Iv = (uint8_t*)iv;
   }
 
-  for(i = 0; i < length; i += KEYLEN)
+  for(i = 0; i < length; i += BLOCKLEN)
   {
-    BlockCopy(output, input);
+    memcpy(output, input, BLOCKLEN);
     state = (state_t*)output;
     InvCipher();
     XorWithIv(output);
     Iv = input;
-    input += KEYLEN;
-    output += KEYLEN;
+    input += BLOCKLEN;
+    output += BLOCKLEN;
   }
 
-  if(remainders)
+  if(extra)
   {
-    BlockCopy(output, input);
-    memset(output+remainders, 0, KEYLEN - remainders); /* add 0-padding */
+    memcpy(output, input, extra);
     state = (state_t*)output;
     InvCipher();
   }
