@@ -18,7 +18,9 @@
   #define ECB 1
 #endif
 
-
+#ifndef CMAC
+  #define CMAC 1
+#endif
 
 #if defined(ECB) && ECB
 
@@ -36,5 +38,11 @@ void AES128_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length,
 #endif // #if defined(CBC) && CBC
 
 
+#if defined(CMAC) && CMAC
+
+void AES128_CBC_encrypt_block(uint8_t* output, uint8_t* input, const uint8_t* key);
+void AES128_CMAC(uint8_t* mac, uint8_t* message, uint32_t msgLen, uint8_t* key);
+
+#endif // #if defined(CMAC) && CMAC
 
 #endif //_AES_H_
