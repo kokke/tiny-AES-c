@@ -506,9 +506,6 @@ void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
   uintptr_t i;
   uint8_t extra = length % BLOCKLEN; /* Remaining bytes in the last non-full block */
 
-  //memcpy(output, input, BLOCKLEN);
-  //state = (state_t*)output;
-
   // Skip the key expansion if key is passed as 0
   if(0 != key)
   {
@@ -546,9 +543,6 @@ void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
   uintptr_t i;
   uint8_t extra = length % BLOCKLEN; /* Remaining bytes in the last non-full block */
 
-  //memcpy(output, input, BLOCKLEN);
-  //state = (state_t*)output;
-  
   // Skip the key expansion if key is passed as 0
   if(0 != key)
   {
