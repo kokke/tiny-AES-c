@@ -30,7 +30,7 @@ GCC size output when ECB mode is compiled for ARM:
     $ arm-none-eabi-gcc -Os -c aes.c -DCBC=0
     $ size aes.o
        text    data     bss     dec     hex filename
-       2323       0     184    2507     9cb aes.o
+       2316       0     184    2500     9cb aes.o
 
 
 
@@ -40,7 +40,7 @@ GCC size output when ECB mode is compiled for ARM:
     $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0
     $ size aes.o
        text    data     bss     dec     hex filename
-       1775       0     184    1959     7a7 aes.o
+       1796       0     184    1980     7a7 aes.o
 
 
 
