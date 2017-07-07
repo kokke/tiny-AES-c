@@ -10,7 +10,7 @@ void AES_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t* output);
 void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 ```
-You can choose to use the standard 128b key or 192/256b by defining the symbols AES192 or AES256
+You can choose to use the standard 128b key or 192/256b by defining the symbols AES192 or AES256 in `aes.h` - AES128 is defined by default.
 
 You can choose to use one or both of the modes-of-operation, by defining the symbols CBC and ECB. See the header file for clarification.
 
