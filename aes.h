@@ -19,6 +19,8 @@
 #endif
 
 #define AES128 1
+//#define AES192 1
+//#define AES256 1
 
 #if defined(ECB) && (ECB == 1)
 
