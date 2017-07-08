@@ -44,12 +44,12 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 #define Nb 4
 #define BLOCKLEN 16 //Block length in bytes AES is 128b block only
 
-#ifdef AES256
+#if defined(AES256) && (AES256 == 1)
     #define Nk 8
     #define KEYLEN 32
     #define Nr 14
     #define keyExpSize 240
-#elif defined(AES192)
+#elif defined(AES192) && (AES192 == 1)
     #define Nk 6
     #define KEYLEN 24
     #define Nr 12
@@ -214,7 +214,7 @@ static void KeyExpansion(void)
 
       tempa[0] =  tempa[0] ^ Rcon[i/Nk];
     }
-#ifdef AES256
+#if defined(AES256) && (AES256 == 1)
     if (i % Nk == 4)
     {
       // Function Subword()
@@ -285,7 +285,7 @@ static void ShiftRows(void)
   (*state)[3][2] = temp;
 
   // Rotate third row 3 columns to left
-  temp       = (*state)[0][3];
+  temp           = (*state)[0][3];
   (*state)[0][3] = (*state)[3][3];
   (*state)[3][3] = (*state)[2][3];
   (*state)[2][3] = (*state)[1][3];
@@ -309,7 +309,7 @@ static void MixColumns(void)
     Tm  = (*state)[i][0] ^ (*state)[i][1] ; Tm = xtime(Tm);  (*state)[i][0] ^= Tm ^ Tmp ;
     Tm  = (*state)[i][1] ^ (*state)[i][2] ; Tm = xtime(Tm);  (*state)[i][1] ^= Tm ^ Tmp ;
     Tm  = (*state)[i][2] ^ (*state)[i][3] ; Tm = xtime(Tm);  (*state)[i][2] ^= Tm ^ Tmp ;
-    Tm  = (*state)[i][3] ^ t ;        Tm = xtime(Tm);  (*state)[i][3] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][3] ^ t ;              Tm = xtime(Tm);  (*state)[i][3] ^= Tm ^ Tmp ;
   }
 }
 
@@ -453,7 +453,7 @@ static void InvCipher(void)
 /*****************************************************************************/
 /* Public functions:                                                         */
 /*****************************************************************************/
-#if defined(ECB) && ECB
+#if defined(ECB) && (ECB == 1)
 
 
 void AES_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t* output, const uint32_t length)
@@ -489,7 +489,7 @@ void AES_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output, 
 
 
 
-#if defined(CBC) && CBC
+#if defined(CBC) && (CBC == 1)
 
 
 static void XorWithIv(uint8_t* buf)
@@ -575,4 +575,4 @@ void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
   }
 }
 
-#endif // #if defined(CBC) && CBC
+#endif // #if defined(CBC) && (CBC == 1)
