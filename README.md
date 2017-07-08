@@ -44,15 +44,13 @@ GCC size output when ECB mode is compiled for ARM:
 
 
 
-I am using Mentor Graphics free ARM toolchain:
-
+I am using the Free Software Foundation, ARM GCC compiler:
 
     $ arm-none-eabi-gcc --version
-    arm-none-eabi-gcc (GNU Tools for ARM Embedded Processors) 4.8.4 20140526 (release) [ARM/embedded-4_8-branch revision 211358]
+    arm-none-eabi-gcc (4.8.4-1+11-1) 4.8.4 20141219 (release)
     Copyright (C) 2013 Free Software Foundation, Inc.
     This is free software; see the source for copying conditions.  There is NO
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
 
 
 
