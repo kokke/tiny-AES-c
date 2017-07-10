@@ -23,10 +23,8 @@ The module uses around 200 bytes of RAM and 2.5K ROM when compiled for ARM (~2K 
 It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
 
 I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
-A heartfelt thank-you to all the nice people out there who have contributed to this project.
 
-
-GCC size output when ECB mode is compiled for ARM:
+GCC size output when only ECB mode is compiled for ARM (using 128 bit block size):
 
 
 
@@ -61,6 +59,9 @@ I am using the Free Software Foundation, ARM GCC compiler:
 This implementation is verified against the data in:
 
 [National Institute of Standards and Technology Special Publication 800-38A 2001 ED](http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf) Appendix F: Example Vectors for Modes of Operation of the AES.
+
+
+A heartfelt thank-you to all the nice people out there who have contributed to this project.
 
 
 All material in this repository is in the public domain.
