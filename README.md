@@ -2,7 +2,7 @@
 
 This is a small and portable implementation of the AES ECB and CBC encryption algorithms written in C.
 
-You can override the default 128bit key with a 192 or 256bit by defining the symbols AES192 or AES256 in `aes.h`.
+You can override the default block-size of 128 bit with 192 or 256 bit by defining the symbols AES192 or AES256 in `aes.h`.
 
 The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
