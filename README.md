@@ -18,7 +18,7 @@ You can choose to use one or both of the modes-of-operation, by defining the sym
 
 There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input. The two functions AES_ECB_xxcrypt() do most of the work, and they expect inputs of 128 bit length.
 
-The module uses around 200 bytes of RAM and 2.5K ROM when compiled for ARM (~2K for Thumb but YMMV).
+The module uses less than 200 bytes of RAM and 2.3K ROM when compiled for ARM (<2K for Thumb but YMMV).
 
 It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
 
@@ -26,22 +26,18 @@ I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
 
 GCC size output when only ECB mode is compiled for ARM (using 128 bit block size):
 
-
-
     $ arm-none-eabi-gcc -Os -c aes.c -DCBC=0
     $ size aes.o
        text    data     bss     dec     hex filename
-       2316       0     184    2500     9cb aes.o
+       2071       0     184    2255     8cf aes.o
 
 
+.. and when compiling for the THUMB instruction set, we end up just above 1.7K in code size.
 
-
-.. and when compiling for the THUMB instruction set, we end up around 2K in code size.
-
-    $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0
+    $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0 -DAES128=1
     $ size aes.o
        text    data     bss     dec     hex filename
-       1796       0     184    1980     7a7 aes.o
+       1551       0     184    1735     6c7 aes.o
 
 
 
