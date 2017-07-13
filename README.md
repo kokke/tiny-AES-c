@@ -34,7 +34,7 @@ GCC size output when only ECB mode is compiled for ARM (using 128 bit block size
 
 .. and when compiling for the THUMB instruction set, we end up just above 1.7K in code size.
 
-    $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0 -DAES128=1
+    $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0
     $ size aes.o
        text    data     bss     dec     hex filename
        1551       0     184    1735     6c7 aes.o
