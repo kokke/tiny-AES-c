@@ -37,7 +37,7 @@ GCC size output when only ECB mode is compiled for ARM (using 128 bit block size
     $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0
     $ size aes.o
        text    data     bss     dec     hex filename
-       1551       0     184    1735     6c7 aes.o
+       1499	      0	    184	   1683	    693	aes.o
 
 
 
