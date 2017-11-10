@@ -311,7 +311,8 @@ static void ShiftRows(void)
 
 static uint8_t xtime(uint8_t x)
 {
-  return ((x<<1) ^ (((x>>7) & 1) * 0x1b));
+  return ((x<<1) ^ (((x>>7) & 1) * 0x1b)) & 0x00FF; 
+      // & 0x00FF trunkates the higher byte for systems with 16bit data addressing (TI C2000)
 }
 
 // MixColumns function mixes the columns of the state matrix
