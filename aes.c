@@ -550,6 +550,8 @@ void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
   if (extra)
   {
     memcpy(output, input, extra);
+    memset((output + extra), 0, (BLOCKLEN - extra));
+    XorWithIv(output);
     state = (state_t*)output;
     Cipher();
   }
