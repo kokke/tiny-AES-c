@@ -30,6 +30,9 @@ test.out : aes.o test.o
 	# linking object code to binary
 	$(CC) $(CFLAGS) aes.o test.o -o test.out
 
+file_crypt: aes.c file_crypt.c
+	$(CC) $(CFLAGS) aes.c file_crypt.c -o file_crypt
+
 small: test.out
 	$(OBJCOPY) -j .text -O ihex test.out rom.hex
 
