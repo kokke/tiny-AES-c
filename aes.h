@@ -44,8 +44,7 @@ void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
 
 
 #if defined(CTR) && (CTR == 1)
-
-/* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
+/* Same function for encrypting as for decrypting. Note no IV/nonce should ever be reused with the same key */
 void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* nonce);
 
 #endif // #if defined(CTR) && (CTR == 1)
