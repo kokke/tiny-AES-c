@@ -18,6 +18,11 @@
   #define ECB 1
 #endif
 
+#ifndef CTR
+  #define CTR 1
+#endif
+
+
 #define AES128 1
 //#define AES192 1
 //#define AES256 1
@@ -36,6 +41,14 @@ void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
 void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 
 #endif // #if defined(CBC) && (CBC == 1)
+
+
+#if defined(CTR) && (CTR == 1)
+
+/* Symmetrical operation: same function for encrypting as for decrypting */
+void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
+
+#endif // #if defined(CTR) && (CTR == 1)
 
 
 #endif //_AES_H_
