@@ -7,7 +7,8 @@
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
 // CBC enables AES encryption in CBC-mode of operation.
-// ECB enables the basic ECB 16-byte block algorithm. Both can be enabled simultaneously.
+// CTR enables encryption in counter-mode.
+// ECB enables the basic ECB 16-byte block algorithm. All can be enabled simultaneously.
 
 // The #ifndef-guard allows it to be configured before #include'ing or at compile time.
 #ifndef CBC
