@@ -618,10 +618,12 @@ void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, con
       state = (state_t*)buffer;
       Cipher();
 
+      /* Increment counter and handle overflow */
       for (j = (BLOCKLEN - 1); j >= 0; --j)
       {
         counter[j] += 1;
    
+        /* Break if no overflow, keep going otherwise */
         if (counter[j] != 0)
         {
           break;
