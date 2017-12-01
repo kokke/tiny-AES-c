@@ -628,7 +628,7 @@ void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, con
       }
     }
 
-    output[i] = (input[i]) ^ (buffer[i & 0x0F]);
+    output[i] = (input[i] ^ buffer[(i & 0x0F)]);
   }
 }
 
