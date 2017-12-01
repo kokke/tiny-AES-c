@@ -612,7 +612,7 @@ void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, con
   int i, j;
   for (i = 0; i < length; ++i)
   {
-    if ((i & 0x0F) == 0)
+    if ((i & (BLOCKLEN - 1)) == 0)
     {
       memcpy(buffer, counter, BLOCKLEN);
       state = (state_t*)buffer;
@@ -629,7 +629,7 @@ void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, con
       }
     }
 
-    output[i] = (input[i] ^ buffer[(i & 0x0F)]);
+    output[i] = (input[i] ^ buffer[(i & (BLOCKLEN - 1))]);
   }
 }
 
