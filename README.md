@@ -1,6 +1,6 @@
 ### Tiny AES in C
 
-This is a small and portable implementation of the AES ECB and CBC encryption algorithms written in C.
+This is a small and portable implementation of the AES ECB, CTR and CBC encryption algorithms written in C.
 
 You can override the default block-size of 128 bit with 192 or 256 bit by defining the symbols AES192 or AES256 in `aes.h`.
 
@@ -11,6 +11,9 @@ void AES_ECB_encrypt(uint8_t* input, const uint8_t* key, uint8_t* output);
 void AES_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t* output);
 void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
+
+/* Symmetrical operation: same function for encrypting as for decrypting */
+void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 ```
 
 
@@ -26,7 +29,7 @@ I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
 
 GCC size output when only ECB mode is compiled for ARM (using 128 bit block size):
 
-    $ arm-none-eabi-gcc -Os -c aes.c -DCBC=0
+    $ arm-none-eabi-gcc -Os -c aes.c -DCBC=0 -DCTR=0
     $ size aes.o
        text    data     bss     dec     hex filename
        2015	      0	    184	   2199	    897	aes.o
@@ -34,7 +37,7 @@ GCC size output when only ECB mode is compiled for ARM (using 128 bit block size
 
 .. and when compiling for the THUMB instruction set, we end up just above 1.7K in code size.
 
-    $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0
+    $ arm-none-eabi-gcc -mthumb -Os -c aes.c -DCBC=0 -DCTR=0
     $ size aes.o
        text    data     bss     dec     hex filename
        1499	      0	    184	   1683	    693	aes.o
