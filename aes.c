@@ -600,11 +600,12 @@ void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, co
 
 #if defined(CTR) && (CTR == 1)
 
-void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv)
+/* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
+void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* nonce)
 {
   uint8_t buffer[BLOCKLEN], counter[BLOCKLEN];
   
-  memcpy(counter, iv, BLOCKLEN);
+  memcpy(counter, nonce, BLOCKLEN);
   Key = key;
   KeyExpansion();
   
