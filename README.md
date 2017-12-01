@@ -13,8 +13,8 @@ void AES_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t* output);
 void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
 
-/* Symmetrical operation: same function for encrypting as for decrypting */
-void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
+/* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
+void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* nonce);
 ```
 
 
