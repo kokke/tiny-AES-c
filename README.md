@@ -28,6 +28,7 @@ It is one of the smallest implementation in C I've seen yet, but do contact me i
 
 I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
 
+
 GCC size output when only CTR mode is compiled for ARM:
 
     $ arm-none-eabi-gcc -Os -DCBC=0 -DECB=0 -DCTR=1 -c aes.c
