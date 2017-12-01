@@ -609,7 +609,8 @@ void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, con
   Key = key;
   KeyExpansion();
   
-  int i, j;
+  int j;
+  unsigned i;
   for (i = 0; i < length; ++i)
   {
     if ((i & (BLOCKLEN - 1)) == 0)
