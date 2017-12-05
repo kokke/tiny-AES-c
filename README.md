@@ -7,16 +7,27 @@ You can override the default key-size of 128 bit with 192 or 256 bit by defining
 The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
 ```C
-void AES_ECB_encrypt(uint8_t* input, const uint8_t* key, uint8_t* output);
-void AES_ECB_decrypt(uint8_t* input, const uint8_t* key, uint8_t* output);
+//Init ctx with
+void AES_init_ctx(struct AES_ctx *ctx,const uint8_t* key);
+void AES_init_ctx_iv(struct AES_ctx *ctx,const uint8_t* key,const uint8_t* iv);
 
-void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
-void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
+//or reset iv at random point
+void AES_ctx_set_iv(struct AES_ctx *ctx,const uint8_t* iv);
 
-/* Same function for encrypting as for decrypting. Note no IV/nonce should ever be reused with the same key */
-void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* nonce);
+//then do 
+void AES_ECB_encrypt(struct AES_ctx *ctx, const uint8_t* buf);
+void AES_ECB_decrypt(struct AES_ctx *ctx, const uint8_t* buf);
+
+void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length);
+void AES_CBC_decrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length);
+
+/* Same function for encrypting as for decrypting in CTR mode */
+void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 ```
 
+Note: 
+ * We don't provide any padding so all buffers should be mutiple of 16 bytes if you need padding we rocomend https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7
+ * ECB mode is considered unsafe and is not implemented in streaming mode. If you realy need this just call the function for every block of 16 bytes you need encrypted. See https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB) for more details
 
 You can choose to use any or all of the modes-of-operations, by defining the symbols CBC, CTR or ECB. See the header file for clarification.
 
