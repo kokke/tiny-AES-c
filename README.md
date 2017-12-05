@@ -20,7 +20,7 @@ void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, con
 
 You can choose to use any or all of the modes-of-operations, by defining the symbols CBC, CTR or ECB. See the header file for clarification.
 
-There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input. The two functions AES_ECB_xxcrypt() do most of the work, and they expect inputs of 128 bit length.
+There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input.
 
 The module uses less than 200 bytes of RAM and 1-2K ROM when compiled for ARM, but YMMV depending on which modes are enabled.
 
