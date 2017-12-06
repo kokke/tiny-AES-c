@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
 // CBC enables AES encryption in CBC-mode of operation.
@@ -57,8 +56,8 @@ void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv);
 
 #if defined(ECB) && (ECB == 1)
 // buffer size is exactly AES_BLOCKLEN bytes; 
-// you need only AES_init_ctx as Iv is not used in ECB 
-// NB: ECB s considered insecure
+// you need only AES_init_ctx as IV is not used in ECB 
+// NB: ECB is considered insecure for most uses
 void AES_ECB_encrypt(struct AES_ctx* ctx, const uint8_t* buf);
 void AES_ECB_decrypt(struct AES_ctx* ctx, const uint8_t* buf);
 
@@ -67,9 +66,9 @@ void AES_ECB_decrypt(struct AES_ctx* ctx, const uint8_t* buf);
 
 #if defined(CBC) && (CBC == 1)
 // buffer size MUST be mutile of AES_BLOCKLEN;
-// We suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 if you need one
-// you need to set iv in ctx via AES_init_ctx_iv or AES_ctx_set_iv
-// NB: no IV should ever be reused with the same key 
+// Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+// NOTES: you need to set IV in ctx via AES_init_ctx_iv() or AES_ctx_set_iv()
+//        no IV should ever be reused with the same key 
 void AES_CBC_encrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 
@@ -79,11 +78,11 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 #if defined(CTR) && (CTR == 1)
 
 // Same function for encrypting as for decrypting. 
-// iv is incremented for every block, and usesd after  encryption as xor compliment for output
-// buffer size MUST be mutile of AES_BLOCKLEN;
-// We suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 if you need one
-// you need to set iv in ctx via AES_init_ctx_iv or AES_ctx_set_iv
-// NB: no IV should ever be reused with the same key 
+// IV is incremented for every block, and used after encryption as XOR-compliment for output
+// buffer size MUST be multiple of AES_BLOCKLEN;
+// Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+// NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
+//        no IV should ever be reused with the same key 
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
