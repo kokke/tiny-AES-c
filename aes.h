@@ -28,26 +28,62 @@
 //#define AES192 1
 //#define AES256 1
 
-#if defined(ECB) && (ECB == 1)
+#define AES_BLOCKLEN 16 //Block length in bytes AES is 128b block only
 
-void AES_ECB_encrypt(const uint8_t* input, const uint8_t* key, uint8_t *output, const uint32_t length);
-void AES_ECB_decrypt(const uint8_t* input, const uint8_t* key, uint8_t *output, const uint32_t length);
+#if defined(AES256) && (AES256 == 1)
+    #define AES_KEYLEN 32
+    #define AES_keyExpSize 240
+#elif defined(AES192) && (AES192 == 1)
+    #define AES_KEYLEN 24
+    #define AES_keyExpSize 208
+#else
+    #define AES_KEYLEN 16   // Key length in bytes
+    #define AES_keyExpSize 176
+#endif
+
+struct AES_ctx {
+  uint8_t RoundKey[AES_keyExpSize];
+  #if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
+  uint8_t Iv[AES_BLOCKLEN];
+  #endif
+};
+
+void AES_init_ctx(struct AES_ctx *ctx,const uint8_t* key);
+#if defined(CBC) && (CBC == 1)
+void AES_init_ctx_iv(struct AES_ctx *ctx,const uint8_t* key,const uint8_t* iv);
+void AES_ctx_set_iv(struct AES_ctx *ctx,const uint8_t* iv);
+#endif
+
+#if defined(ECB) && (ECB == 1)
+// buffer size is exactly AES_BLOCKLEN bytes; 
+// you need only AES_init_ctx as Iv is not used in ECB 
+// NB: ECB s considered insecure
+void AES_ECB_encrypt(struct AES_ctx *ctx, const uint8_t* buf);
+void AES_ECB_decrypt(struct AES_ctx *ctx, const uint8_t* buf);
 
 #endif // #if defined(ECB) && (ECB == !)
 
 
 #if defined(CBC) && (CBC == 1)
-
-void AES_CBC_encrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
-void AES_CBC_decrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* iv);
+// buffer size MUST be mutile of AES_BLOCKLEN;
+// We suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 if you need one
+// you need to set iv in ctx via AES_init_ctx_iv or AES_ctx_set_iv
+// NB: no IV should ever be reused with the same key 
+void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length);
+void AES_CBC_decrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length);
 
 #endif // #if defined(CBC) && (CBC == 1)
 
 
 #if defined(CTR) && (CTR == 1)
 
-/* Same function for encrypting as for decrypting. Note no IV/nonce should ever be reused with the same key */
-void AES_CTR_xcrypt_buffer(uint8_t* output, uint8_t* input, uint32_t length, const uint8_t* key, const uint8_t* nonce);
+// Same function for encrypting as for decrypting. 
+// iv is incremented for every block, and usesd after  encryption as xor compliment for output
+// buffer size MUST be mutile of AES_BLOCKLEN;
+// We suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 if you need one
+// you need to set iv in ctx via AES_init_ctx_iv or AES_ctx_set_iv
+// NB: no IV should ever be reused with the same key 
+void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
 
