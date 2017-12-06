@@ -26,8 +26,8 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 ```
 
 Note: 
- * We don't provide any padding so all buffers should be mutiple of 16 bytes if you need padding we rocomend https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7
- * ECB mode is considered unsafe and is not implemented in streaming mode. If you realy need this just call the function for every block of 16 bytes you need encrypted. See https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB) for more details
+ * No padding is provided so all buffers should be mutiples of 16 bytes. For padding [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7) is recommendable.
+ * ECB mode is considered unsafe for most uses and is not implemented in streaming mode. If need this mode, call the function for every block of 16 bytes you need encrypted. See [wikipedia's article on ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB)) for more details.
 
 You can choose to use any or all of the modes-of-operations, by defining the symbols CBC, CTR or ECB. See the header file for clarification.
 
@@ -47,7 +47,7 @@ GCC size output when only CTR mode is compiled for ARM:
        text    data     bss     dec     hex filename
        1203       0       0    1203     4b3 aes.o
 
-.. and when compiling for the THUMB instruction set, we end up just above 1K in code size.
+.. and when compiling for the THUMB instruction set, we end up just below 1K in code size.
 
     $ arm-none-eabi-gcc -Os -mthumb -DCBC=0 -DECB=0 -DCTR=1 -c aes.c
     $ size aes.o
