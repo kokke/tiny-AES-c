@@ -45,14 +45,14 @@ GCC size output when only CTR mode is compiled for ARM:
     $ arm-none-eabi-gcc -Os -DCBC=0 -DECB=0 -DCTR=1 -c aes.c
     $ size aes.o
        text    data     bss     dec     hex filename
-       1155       0     184    1339     53b aes.o
+       1203       0       0    1203     4b3 aes.o
 
 .. and when compiling for the THUMB instruction set, we end up just above 1K in code size.
 
     $ arm-none-eabi-gcc -Os -mthumb -DCBC=0 -DECB=0 -DCTR=1 -c aes.c
     $ size aes.o
        text    data     bss     dec     hex filename
-        855       0     184    1039     40f aes.o
+        955       0       0     955     3bb aes.o
 
 
 I am using the Free Software Foundation, ARM GCC compiler:
