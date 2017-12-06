@@ -7,7 +7,7 @@ You can override the default key-size of 128 bit with 192 or 256 bit by defining
 The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
 ```C
-/* Initialize context calling: */
+/* Initialize context calling one of: */
 void AES_init_ctx(struct AES_ctx *ctx,const uint8_t* key);
 void AES_init_ctx_iv(struct AES_ctx *ctx,const uint8_t* key,const uint8_t* iv);
 
