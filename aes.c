@@ -155,8 +155,6 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
   uint8_t tempa[4]; // Used for the column/row operations
   
   // The first round key is the key itself.
-  memcpy(RoundKey, Key, AES_keyExpSize);
-  /*
   for (i = 0; i < Nk; ++i)
   {
     RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
@@ -164,7 +162,6 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
     RoundKey[(i * 4) + 2] = Key[(i * 4) + 2];
     RoundKey[(i * 4) + 3] = Key[(i * 4) + 3];
   }
-  */
 
   // All other round keys are found from the previous round keys.
   for (i = Nk; i < Nb * (Nr + 1); ++i)
