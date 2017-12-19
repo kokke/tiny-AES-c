@@ -9,7 +9,7 @@ The API is very simple and looks like this (I am using C99 `<stdint.h>`-style an
 ```C
 /* Initialize context calling one of: */
 void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key);
-void AES_init_ctx_iv(struct AES_ctx* ctx,const uint8_t* key, const uint8_t* iv);
+void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv);
 
 /* ... or reset IV at random point: */
 void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv);
