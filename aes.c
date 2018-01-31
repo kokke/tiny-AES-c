@@ -226,7 +226,7 @@ void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key)
 {
   KeyExpansion(ctx->RoundKey, key);
 }
-#if defined(CBC) && (CBC == 1)
+#if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
 void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
 {
   KeyExpansion(ctx->RoundKey, key);
