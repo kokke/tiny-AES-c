@@ -238,6 +238,14 @@ void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv)
 }
 #endif
 
+#if (defined(IGE) && (IGE == 1))
+void AES_init_ctx_iv32(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
+{
+  KeyExpansion(ctx->RoundKey, key);
+  memcpy (ctx->Iv, iv, 32);
+}
+#endif
+
 // This function adds the round key to state.
 // The round key is added to the state by an XOR function.
 static void AddRoundKey(uint8_t round,state_t* state,uint8_t* RoundKey)
@@ -564,4 +572,52 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
 }
 
 #endif // #if defined(CTR) && (CTR == 1)
+
+AES_IGE_encrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
+{
+  uintptr_t i;
+  uint8_t tmp[AES_BLOCKLEN];
+  uint8_t *Iv1 = (ctx->Iv);
+  uint8_t *Iv2 = (ctx->Iv + AES_BLOCKLEN);
+
+  for (i = 0; i < length; i += AES_BLOCKLEN)
+  {
+    memcpy(tmp, buf, AES_BLOCKLEN);
+
+    XorWithIv(buf, Iv1);
+    Cipher((state_t*)buf, ctx->RoundKey);
+    XorWithIv(buf, Iv2);
+
+    Iv1 = buf;
+    memcpy(Iv2, tmp, AES_BLOCKLEN);
+    buf += AES_BLOCKLEN;
+  }
+  memcpy(ctx->Iv, Iv1, AES_BLOCKLEN);
+}
+
+AES_IGE_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
+{
+  uintptr_t i;
+  uint8_t tmp[AES_BLOCKLEN];
+  uint8_t *Iv1 = (ctx->Iv);
+  uint8_t *Iv2 = (ctx->Iv + AES_BLOCKLEN);
+
+  for (i = 0; i < length; i += AES_BLOCKLEN)
+  {
+    memcpy(tmp, buf, AES_BLOCKLEN);
+
+    XorWithIv(buf, Iv2);
+    InvCipher((state_t*)buf, ctx->RoundKey);
+    XorWithIv(buf, Iv1);
+
+    memcpy(Iv1, tmp, AES_BLOCKLEN);
+    Iv2 = buf;
+    buf += AES_BLOCKLEN;
+  }
+  memcpy(ctx->Iv + AES_BLOCKLEN, Iv2, AES_BLOCKLEN);
+}
+
+
+#if defined(IGE) && (IGE == 1)
+#endif // #if defined(IGE) && (IGE == 1)
 

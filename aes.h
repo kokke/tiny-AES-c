@@ -22,10 +22,14 @@
   #define CTR 1
 #endif
 
+#ifndef IGE
+  #define IGE 1
+#endif
 
-#define AES128 1
+
+//#define AES128 1
 //#define AES192 1
-//#define AES256 1
+#define AES256 1
 
 #define AES_BLOCKLEN 16 //Block length in bytes AES is 128b block only
 
@@ -52,6 +56,10 @@ void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key);
 #if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
 void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv);
 void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv);
+#endif
+#if (defined(IGE) && (IGE == 1))
+// IGE mode needs an iv of 32 bytes instead the normal AES_BLOCKLEN
+void AES_init_ctx_iv32(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv);
 #endif
 
 #if defined(ECB) && (ECB == 1)
@@ -85,6 +93,12 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
+
+
+#if defined(IGE) && (IGE == 1)
+void AES_IGE_encrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
+void AES_IGE_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
+#endif // #if defined(IGE) && (IGE == 1)
 
 
 #endif //_AES_H_
