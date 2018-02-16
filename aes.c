@@ -242,7 +242,7 @@ void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv)
 void AES_init_ctx_iv32(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
 {
   KeyExpansion(ctx->RoundKey, key);
-  memcpy (ctx->Iv, iv, 32);
+  memcpy (ctx->Iv, iv, 2 * AES_BLOCKLEN);
 }
 #endif
 
