@@ -319,6 +319,9 @@ static void MixColumns(state_t* state)
 }
 
 // Multiply is used to multiply numbers in the field GF(2^8)
+// Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
+//       The compiler seems to be able to vectorize the operation better this way.
+//       See https://github.com/kokke/tiny-AES-c/pull/34
 #if MULTIPLY_AS_A_FUNCTION
 static uint8_t Multiply(uint8_t x, uint8_t y)
 {
@@ -326,7 +329,7 @@ static uint8_t Multiply(uint8_t x, uint8_t y)
        ((y>>1 & 1) * xtime(x)) ^
        ((y>>2 & 1) * xtime(xtime(x))) ^
        ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
-       ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))));
+       ((y>>4 & 1) * xtime(xtime(xtime(xtime(x)))))); /* this last call to xtime() can be omitted */
   }
 #else
 #define Multiply(x, y)                                \
