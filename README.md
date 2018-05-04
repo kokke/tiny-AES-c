@@ -37,7 +37,7 @@ There is no built-in error checking or protection from out-of-bounds memory acce
 
 The module uses less than 200 bytes of RAM and 1-2K ROM when compiled for ARM, but YMMV depending on which modes are enabled.
 
-It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
+It is one of the smallest implementations in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
 
 I've successfully used the code on 64bit x86, 32bit ARM and 8 bit AVR platforms.
 
