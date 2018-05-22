@@ -8,5 +8,6 @@
     "url": "https://github.com/kokke/tiny-AES-c.git"
   },
   "frameworks": "*",
-  "platforms": "*"
+  "platforms": "*",
+  "examples": "test.c"
 }
