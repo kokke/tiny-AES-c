@@ -5,6 +5,12 @@ CC           = gcc
 LD           = gcc
 CFLAGS       = -Wall -Os -c
 LDFLAGS      = -Wall -Os -Wl,-Map,test.map
+ifdef AES192
+CFLAGS += -DAES192=1
+endif
+ifdef AES256
+CFLAGS += -DAES256=1
+endif
 
 OBJCOPYFLAFS = -j .text -O ihex
 OBJCOPY      = objcopy
@@ -24,11 +30,11 @@ test.hex : test.elf
 	$(OBJCOPY) ${OBJCOPYFLAFS} $< $@
 
 test.o : test.c aes.h aes.o
-	echo [CC] $@
+	echo [CC] $@ $(CFLAGS)
 	$(CC) $(CFLAGS) -o  $@ $<
 
 aes.o : aes.c aes.h
-	echo [CC] $@
+	echo [CC] $@ $(CFLAGS)
 	$(CC) $(CFLAGS) -o $@ $<
 
 test.elf : aes.o test.o
@@ -38,6 +44,11 @@ test.elf : aes.o test.o
 
 clean:
 	rm -f *.OBJ *.LST *.o *.gch *.out *.hex *.map
+
+test:
+	make clean && make && ./test.elf
+	make clean && make AES192=1 && ./test.elf
+	make clean && make AES256=1 && ./test.elf
 
 lint:
 	$(call SPLINT)
