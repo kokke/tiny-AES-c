@@ -432,6 +432,7 @@ static void Cipher(state_t* state, uint8_t* RoundKey)
   AddRoundKey(Nr, state, RoundKey);
 }
 
+#if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 static void InvCipher(state_t* state,uint8_t* RoundKey)
 {
   uint8_t round = 0;
@@ -456,7 +457,7 @@ static void InvCipher(state_t* state,uint8_t* RoundKey)
   InvSubBytes(state);
   AddRoundKey(0, state, RoundKey);
 }
-
+#endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 
 /*****************************************************************************/
 /* Public functions:                                                         */
