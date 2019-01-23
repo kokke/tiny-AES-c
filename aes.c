@@ -341,6 +341,7 @@ static uint8_t Multiply(uint8_t x, uint8_t y)
 
 #endif
 
+#if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
@@ -404,7 +405,7 @@ static void InvShiftRows(state_t* state)
   (*state)[2][3] = (*state)[3][3];
   (*state)[3][3] = temp;
 }
-
+#endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 
 // Cipher is the main function that encrypts the PlainText.
 static void Cipher(state_t* state, uint8_t* RoundKey)
