@@ -50,6 +50,9 @@ class TinyAesCConan(ConanFile):
         if not self.options.CBC and not self.options.ECB and not self.options.CTR:
             raise ConanException("Need to at least specify one of CBC, ECB or CTR modes")
 
+        if not self.options.AES128 and not self.options.AES192 and not self.options.AES256:
+            raise ConanException("Need to at least specify one of AES{128, 192, 256} modes")
+
     def build(self):
         cmake = CMake(self)
 
