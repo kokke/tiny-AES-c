@@ -4,8 +4,7 @@ from conans import ConanFile, CMake
 class TinyAesCConan(ConanFile):
     name = "tiny-AES-c"
     version = "1.0.0"
-    license = "MIT"
-    author = "Torfinn Berset <torfinn@bloomlife.com>"
+    license = "The Unlicense"
     url = "https://github.com/kokke/tiny-AES-c"
     description = "Small portable AES128/192/256 in C"
     topics = ("encryption", "crypto", "AES")
@@ -13,6 +12,7 @@ class TinyAesCConan(ConanFile):
 
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "*.c", '*.h', '*.hpp']
+    exports = ["unlicense.txt"]
 
     _options_dict = {
         # enable AES128
@@ -59,6 +59,7 @@ class TinyAesCConan(ConanFile):
         self.copy("*.h", dst="include")
         self.copy("*.hpp", dst="include")
         self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("unlicense.txt")
 
     def package_info(self):
         self.cpp_info.libs = ["tiny-aes"]
