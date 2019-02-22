@@ -15,8 +15,8 @@ void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
 void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv);
 
 /* Then start encrypting and decrypting with the functions below: */
-void AES_ECB_encrypt(struct AES_ctx* ctx, uint8_t* buf);
-void AES_ECB_decrypt(struct AES_ctx* ctx, uint8_t* buf);
+void AES_ECB_encrypt(const struct AES_ctx* ctx, uint8_t* buf);
+void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf);
 
 void AES_CBC_encrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
@@ -47,21 +47,21 @@ GCC size output when only CTR mode is compiled for ARM:
     $ arm-none-eabi-gcc -Os -DCBC=0 -DECB=0 -DCTR=1 -c aes.c
     $ size aes.o
        text    data     bss     dec     hex filename
-       1203       0       0    1203     4b3 aes.o
+       1343       0       0    1343     53f aes.o
 
 .. and when compiling for the THUMB instruction set, we end up just below 1K in code size.
 
     $ arm-none-eabi-gcc -Os -mthumb -DCBC=0 -DECB=0 -DCTR=1 -c aes.c
     $ size aes.o
        text    data     bss     dec     hex filename
-        955       0       0     955     3bb aes.o
+        979       0       0     979     3d3 aes.o
 
 
 I am using the Free Software Foundation, ARM GCC compiler:
 
     $ arm-none-eabi-gcc --version
-    arm-none-eabi-gcc (4.8.4-1+11-1) 4.8.4 20141219 (release)
-    Copyright (C) 2013 Free Software Foundation, Inc.
+    arm-none-eabi-gcc (GNU Tools for Arm Embedded Processors 8-2018-q4-major) 8.2.1 20181213 (release)
+    Copyright (C) 2018 Free Software Foundation, Inc.
     This is free software; see the source for copying conditions.  There is NO
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
