@@ -466,7 +466,7 @@ static void InvCipher(state_t* state, const uint8_t* RoundKey)
 #if defined(ECB) && (ECB == 1)
 
 
-void AES_ECB_encrypt(const struct AES_ctx *ctx, uint8_t* buf)
+void AES_ECB_encrypt(const struct AES_ctx* ctx, uint8_t* buf)
 {
   // The next function call encrypts the PlainText with the Key using AES algorithm.
   Cipher((state_t*)buf, ctx->RoundKey);
@@ -552,9 +552,9 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
       /* Increment Iv and handle overflow */
       for (bi = (AES_BLOCKLEN - 1); bi >= 0; --bi)
       {
-	    /* inc will overflow */
+	/* inc will overflow */
         if (ctx->Iv[bi] == 255)
-	    {
+	{
           ctx->Iv[bi] = 0;
           continue;
         } 
