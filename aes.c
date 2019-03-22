@@ -56,15 +56,38 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
     #define Nr 10       // The number of rounds in AES Cipher.
 #endif
 
-// jcallan@github points out that declaring Multiply as a function 
+/* Global variable array size */
+#define MATRIX_SIZE           256
+#define RCON_SIZE             11  // Can be modified if you use RAM (TINY_AES_USE_RAM)
+
+#if TINY_AES_USE_RAM
+  /* Used to compute sbox and rsbox*/
+  #define SBOX_FORWARD_CONSTANT 0x63
+  #define SBOX_INV_CONSTANT     0x52
+  #define ROTL8(x,shift)        ((uint8_t) ((x) << (shift)) | ((x) >> (8 - (shift))))
+
+  /* Used to compute rcon dynamically */
+  #define RCON_LAST_VALUE       0x8D // The 255th RCON value
+
+  /* Constant used in sbox polynomial calculus */
+  #define POLYNOMIAL_CONSTANT   0x1B
+  #define POLYNOMIAL_MASK       0x80
+  #define DIVIDE_BY_THREE_MASK  0x09
+#endif /* #if TINY_AES_USE_RAM */
+
+// jcallan@github points out that declaring Multiply as a function
 // reduces code size considerably with the Keil ARM compiler.
 // See this link for more information: https://github.com/kokke/tiny-AES-C/pull/3
-#ifndef MULTIPLY_AS_A_FUNCTION
-  #define MULTIPLY_AS_A_FUNCTION 0
+#ifndef TINY_AES_MULTIPLY_AS_A_FUNCTION
+  #define TINY_AES_MULTIPLY_AS_A_FUNCTION 0
 #endif
 
-
-
+// The lookup-tables are either marked const so they can be placed in read-only storage
+// Setting TINY_AES_USE_RAM to 1 and these lookup-tables will be computed dynamically trading ROM for RAM -
+// This can be useful in (embedded) bootloader applications, where ROM is often limited.
+#ifndef TINY_AES_USE_RAM
+  #define TINY_AES_USE_RAM 0
+#endif
 
 /*****************************************************************************/
 /* Private variables:                                                        */
@@ -73,11 +96,12 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 typedef uint8_t state_t[4][4];
 
 
-
-// The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
-// The numbers below can be computed dynamically trading ROM for RAM - 
-// This can be useful in (embedded) bootloader applications, where ROM is often limited.
-static const uint8_t sbox[256] = {
+#if TINY_AES_USE_RAM
+  static uint8_t sbox[MATRIX_SIZE] = {0};
+  static uint8_t rsbox[MATRIX_SIZE] = {0};
+  static uint8_t Rcon[RCON_SIZE] = {0};
+#else
+static const uint8_t sbox[MATRIX_SIZE] = {
   //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
   0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -96,7 +120,7 @@ static const uint8_t sbox[256] = {
   0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
   0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 };
 
-static const uint8_t rsbox[256] = {
+static const uint8_t rsbox[MATRIX_SIZE] = {
   0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
   0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
   0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
@@ -116,9 +140,10 @@ static const uint8_t rsbox[256] = {
 
 // The round constant word array, Rcon[i], contains the values given by 
 // x to the power (i-1) being powers of x (x is denoted as {02}) in the field GF(2^8)
-static const uint8_t Rcon[11] = {
+static const uint8_t Rcon[RCON_SIZE] = {
   0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
+#endif /* #if TINY_AES_USE_RAM */
 /*
  * Jordan Goulder points out in PR #12 (https://github.com/kokke/tiny-AES-C/pull/12),
  * that you can remove most of the elements in the Rcon array, because they are unused.
@@ -148,7 +173,48 @@ static uint8_t getSBoxInvert(uint8_t num)
 */
 #define getSBoxInvert(num) (rsbox[(num)])
 
-// This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states. 
+#if TINY_AES_USE_RAM
+static void initialize_aes_sbox(void) {
+    uint8_t p = 1, q = 1;
+
+    /* loop invariant: p * q == 1 in the Galois field */
+    do {
+        /* multiply p by 3 */
+        p = p ^ (p << 1) ^ (p & POLYNOMIAL_MASK ? POLYNOMIAL_CONSTANT : 0);
+
+        /* divide q by 3 (equals multiplication by 0xf6) */
+        q ^= q << 1;
+        q ^= q << 2;
+        q ^= q << 4;
+        q ^= q & POLYNOMIAL_MASK ? DIVIDE_BY_THREE_MASK : 0;
+
+        /* compute the affine transformation */
+        uint8_t xformed = q ^ ROTL8(q, 1) ^ ROTL8(q, 2) ^ ROTL8(q, 3) ^ ROTL8(q, 4) ^ SBOX_FORWARD_CONSTANT;
+
+        rsbox[xformed] = p;
+        sbox[p] = xformed;
+
+    } while (p != 1);
+
+    /* 0 is a special case since it has no inverse */
+
+    rsbox[0] = SBOX_INV_CONSTANT;
+    sbox[0] = SBOX_FORWARD_CONSTANT;
+}
+
+static void initialize_aes_rcon(void)
+{
+    Rcon[0] = RCON_LAST_VALUE;
+    for(int i = 1; i<RCON_SIZE; i++)
+    {
+        /* compute Rijndael round constant  */
+        Rcon[i] = (Rcon[i-1] << 1);
+        Rcon[i] ^= (Rcon[i-1] & POLYNOMIAL_MASK) ? POLYNOMIAL_CONSTANT : 0;
+    }
+}
+#endif /* #if TINY_AES_USE_RAM */
+
+// This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states.
 static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
 {
   unsigned i, j, k;
@@ -213,7 +279,7 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
         tempa[3] = getSBoxValue(tempa[3]);
       }
     }
-#endif
+#endif /* #if defined(AES256) && (AES256 == 1) */
     j = i * 4; k=(i - Nk) * 4;
     RoundKey[j + 0] = RoundKey[k + 0] ^ tempa[0];
     RoundKey[j + 1] = RoundKey[k + 1] ^ tempa[1];
@@ -226,7 +292,16 @@ void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key)
 {
   KeyExpansion(ctx->RoundKey, key);
 }
-#if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
+
+#if TINY_AES_USE_RAM
+void AES_init_ram(void)
+{
+  initialize_aes_sbox();
+  initialize_aes_rcon();
+}
+#endif
+
+#if (defined(TINY_AES_CBC) && (TINY_AES_CBC == 1)) || (defined(TINY_AES_CTR) && (TINY_AES_CTR == 1))
 void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
 {
   KeyExpansion(ctx->RoundKey, key);
@@ -236,7 +311,7 @@ void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv)
 {
   memcpy (ctx->Iv, iv, AES_BLOCKLEN);
 }
-#endif
+#endif /* #if (defined(TINY_AES_CBC) && (TINY_AES_CBC == 1)) || (defined(TINY_AES_CTR) && (TINY_AES_CTR == 1)) */
 
 // This function adds the round key to state.
 // The round key is added to the state by an XOR function.
@@ -322,7 +397,7 @@ static void MixColumns(state_t* state)
 // Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
 //       The compiler seems to be able to vectorize the operation better this way.
 //       See https://github.com/kokke/tiny-AES-c/pull/34
-#if MULTIPLY_AS_A_FUNCTION
+#if TINY_AES_MULTIPLY_AS_A_FUNCTION
 static uint8_t Multiply(uint8_t x, uint8_t y)
 {
   return (((y & 1) * x) ^
@@ -339,9 +414,9 @@ static uint8_t Multiply(uint8_t x, uint8_t y)
       ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^         \
       ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))   \
 
-#endif
+#endif /* #if TINY_AES_MULTIPLY_AS_A_FUNCTION */
 
-#if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
+#if (defined(TINY_AES_CBC) && TINY_AES_CBC == 1) || (defined(TINY_AES_ECB) && TINY_AES_ECB == 1)
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
@@ -405,7 +480,7 @@ static void InvShiftRows(state_t* state)
   (*state)[2][3] = (*state)[3][3];
   (*state)[3][3] = temp;
 }
-#endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
+#endif // #if (defined(TINY_AES_CBC) && TINY_AES_CBC == 1) || (defined(TINY_AES_ECB) && TINY_AES_ECB == 1)
 
 // Cipher is the main function that encrypts the PlainText.
 static void Cipher(state_t* state, const uint8_t* RoundKey)
@@ -433,7 +508,7 @@ static void Cipher(state_t* state, const uint8_t* RoundKey)
   AddRoundKey(Nr, state, RoundKey);
 }
 
-#if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
+#if (defined(TINY_AES_CBC) && TINY_AES_CBC == 1) || (defined(TINY_AES_ECB) && TINY_AES_ECB == 1)
 static void InvCipher(state_t* state, const uint8_t* RoundKey)
 {
   uint8_t round = 0;
@@ -458,12 +533,12 @@ static void InvCipher(state_t* state, const uint8_t* RoundKey)
   InvSubBytes(state);
   AddRoundKey(0, state, RoundKey);
 }
-#endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
+#endif // #if (defined(TINY_AES_CBC) && TINY_AES_CBC == 1) || (defined(TINY_AES_ECB) && TINY_AES_ECB == 1)
 
 /*****************************************************************************/
 /* Public functions:                                                         */
 /*****************************************************************************/
-#if defined(ECB) && (ECB == 1)
+#if defined(TINY_AES_ECB) && (TINY_AES_ECB == 1)
 
 
 void AES_ECB_encrypt(const struct AES_ctx* ctx, uint8_t* buf)
@@ -479,13 +554,13 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf)
 }
 
 
-#endif // #if defined(ECB) && (ECB == 1)
+#endif // #if defined(TINY_AES_ECB) && (TINY_AES_ECB == 1)
 
 
 
 
 
-#if defined(CBC) && (CBC == 1)
+#if defined(TINY_AES_CBC) && (TINY_AES_CBC == 1)
 
 
 static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
@@ -528,11 +603,11 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf,  uint32_t length)
 
 }
 
-#endif // #if defined(CBC) && (CBC == 1)
+#endif // #if defined(TINY_AES_CBC) && (TINY_AES_CBC == 1)
 
 
 
-#if defined(CTR) && (CTR == 1)
+#if defined(TINY_AES_CTR) && (TINY_AES_CTR == 1)
 
 /* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
@@ -568,5 +643,5 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
   }
 }
 
-#endif // #if defined(CTR) && (CTR == 1)
+#endif // #if defined(TINY_AES_CTR) && (TINY_AES_CTR == 1)
 

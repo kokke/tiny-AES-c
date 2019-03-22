@@ -7,6 +7,9 @@ AR           = ar
 ARFLAGS      = rcs
 CFLAGS       = -Wall -Os -c
 LDFLAGS      = -Wall -Os -Wl,-Map,test.map
+ifdef TINY_AES_USE_RAM
+CFLAGS += -DTINY_AES_USE_RAM=1
+endif
 ifdef AES192
 CFLAGS += -DAES192=1
 endif
@@ -56,6 +59,11 @@ test:
 	make clean && make && ./test.elf
 	make clean && make AES192=1 && ./test.elf
 	make clean && make AES256=1 && ./test.elf
+
+test_ram:
+	make clean && make TINY_AES_USE_RAM=1 && ./test.elf
+	make clean && make AES192=1 TINY_AES_USE_RAM=1 && ./test.elf
+	make clean && make AES256=1 TINY_AES_USE_RAM=1 && ./test.elf
 
 lint:
 	$(call SPLINT)

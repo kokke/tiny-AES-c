@@ -4,9 +4,9 @@
 
 // Enable ECB, CTR and CBC mode. Note this can be done before including aes.h or at compile-time.
 // E.g. with GCC by using the -D flag: gcc -c aes.c -DCBC=0 -DCTR=1 -DECB=1
-#define CBC 1
-#define CTR 1
-#define ECB 1
+#define TINY_AES_CBC 1
+#define TINY_AES_CTR 1
+#define TINY_AES_ECB 1
 
 #include "aes.h"
 
@@ -24,6 +24,10 @@ static void test_encrypt_ecb_verbose(void);
 int main(void)
 {
     int exit;
+#if defined(TINY_AES_USE_RAM) && (TINY_AES_USE_RAM == 1)
+    printf("\nInitializing lookup-tables in RAM\n\n");
+    AES_init_ram();
+#endif
 
 #if defined(AES256)
     printf("\nTesting AES256\n\n");

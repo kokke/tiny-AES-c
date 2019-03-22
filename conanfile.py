@@ -26,13 +26,13 @@ class TinyAesCConan(ConanFile):
         "AES256": [True, False],
 
         # enable AES encryption in CBC-mode of operation
-        "CBC": [True, False],
+        "TINY_AES_CBC": [True, False],
 
         # enable the basic ECB 16-byte block algorithm
-        "ECB": [True, False],
+        "TINY_AES_ECB": [True, False],
 
         # enable encryption in counter-mode
-        "CTR": [True, False],
+        "TINY_AES_CTR": [True, False],
     }
 
     options = _options_dict
@@ -41,9 +41,9 @@ class TinyAesCConan(ConanFile):
         "AES128": True,
         "AES192": False,
         "AES256": False,
-        "CBC": True,
-        "ECB": True,
-        "CTR": True
+        "TINY_AES_CBC": True,
+        "TINY_AES_ECB": True,
+        "TINY_AES_CTR": True
     }
 
     def configure(self):
