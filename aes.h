@@ -10,16 +10,16 @@
 // TINY_AES_ECB enables the basic ECB 16-byte block algorithm. All can be enabled simultaneously.
 
 // The #ifndef-guard allows it to be configured before #include'ing or at compile time.
-#ifndef CBC
-  #define CBC 1
+#ifndef TINY_AES_CBC
+  #define TINY_AES_CBC 1
 #endif
 
-#ifndef ECB
-  #define ECB 1
+#ifndef TINY_AES_ECB
+  #define TINY_AES_ECB 1
 #endif
 
-#ifndef CTR
-  #define CTR 1
+#ifndef TINY_AES_CTR
+  #define TINY_AES_CTR 1
 #endif
 
 
