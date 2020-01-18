@@ -35,8 +35,6 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 /*****************************************************************************/
 /* Includes:                                                                 */
 /*****************************************************************************/
-#include <stdint.h>
-#include <string.h> // CBC mode, for memset
 #include "aes.h"
 
 /*****************************************************************************/
@@ -569,4 +567,3 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
 }
 
 #endif // #if defined(CTR) && (CTR == 1)
-

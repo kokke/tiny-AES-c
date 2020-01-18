@@ -2,6 +2,7 @@
 #define _AES_H_
 
 #include <stdint.h>
+#include <string.h> // CBC mode, for memset
 
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
