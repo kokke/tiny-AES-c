@@ -78,3 +78,7 @@ A heartfelt thank-you to all the nice people out there who have contributed to t
 
 
 All material in this repository is in the public domain.
+
+## Wrappers
+
+- [`tinyaes-py`](https://github.com/naufraghi/tinyaes-py) is a minimal Cython wrapper, compatible with Python 3 but also Python 2 (fully thanks to Cython code generation)
