@@ -60,10 +60,11 @@ GCC size output when only CTR mode is compiled for ARM:
 I am using the Free Software Foundation, ARM GCC compiler:
 
     $ arm-none-eabi-gcc --version
-    arm-none-eabi-gcc (GNU Tools for Arm Embedded Processors 8-2018-q4-major) 8.2.1 20181213 (release)
-    Copyright (C) 2018 Free Software Foundation, Inc.
+    arm-none-eabi-gcc (4.8.4-1+11-1) 4.8.4 20141219 (release)
+    Copyright (C) 2013 Free Software Foundation, Inc.
     This is free software; see the source for copying conditions.  There is NO
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 
 
 
