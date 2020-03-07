@@ -412,23 +412,23 @@ static void Cipher(state_t* state, const uint8_t* RoundKey)
   uint8_t round = 0;
 
   // Add the First round key to the state before starting the rounds.
-  AddRoundKey(0, state, RoundKey); 
-  
+  AddRoundKey(0, state, RoundKey);
+
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
-  // These Nr-1 rounds are executed in the loop below.
-  for (round = 1; round < Nr; ++round)
+  // These Nr rounds are executed in the loop below.
+  // Last one without MixColumns()
+  for (round = 1; ; ++round)
   {
     SubBytes(state);
     ShiftRows(state);
+    if (round == Nr) {
+      break;
+    }
     MixColumns(state);
     AddRoundKey(round, state, RoundKey);
   }
-  
-  // The last round is given below.
-  // The MixColumns function is not here in the last round.
-  SubBytes(state);
-  ShiftRows(state);
+  // Add round key to last round
   AddRoundKey(Nr, state, RoundKey);
 }
 
@@ -438,24 +438,23 @@ static void InvCipher(state_t* state, const uint8_t* RoundKey)
   uint8_t round = 0;
 
   // Add the First round key to the state before starting the rounds.
-  AddRoundKey(Nr, state, RoundKey); 
+  AddRoundKey(Nr, state, RoundKey);
 
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
-  // These Nr-1 rounds are executed in the loop below.
-  for (round = (Nr - 1); round > 0; --round)
+  // These Nr rounds are executed in the loop below.
+  // Last one without InvMixColumn()
+  for (round = (Nr - 1); ; --round)
   {
     InvShiftRows(state);
     InvSubBytes(state);
     AddRoundKey(round, state, RoundKey);
+    if (round == 0) {
+      break;
+    }
     InvMixColumns(state);
   }
-  
-  // The last round is given below.
-  // The MixColumns function is not here in the last round.
-  InvShiftRows(state);
-  InvSubBytes(state);
-  AddRoundKey(0, state, RoundKey);
+
 }
 #endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 
