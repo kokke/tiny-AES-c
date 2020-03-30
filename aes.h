@@ -27,7 +27,7 @@
 //#define AES192 1
 //#define AES256 1
 
-#define AES_BLOCKLEN 16 //Block length in bytes AES is 128b block only
+#define AES_BLOCKLEN 16 // Block length in bytes - AES is 128b block only
 
 #if defined(AES256) && (AES256 == 1)
     #define AES_KEYLEN 32
@@ -87,4 +87,4 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 #endif // #if defined(CTR) && (CTR == 1)
 
 
-#endif //_AES_H_
+#endif // _AES_H_
