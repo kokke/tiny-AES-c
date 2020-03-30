@@ -75,7 +75,7 @@ This implementation is verified against the data in:
 The other appendices in the document are valuable for implementation details on e.g. padding, generation of IVs and nonces in CTR-mode etc.
 
 
-A heartfelt thank-you to all the nice people out there who have contributed to this project.
+A heartfelt thank-you to [all the nice people](https://github.com/kokke/tiny-AES-c/graphs/contributors) out there who have contributed to this project.
 
 
 All material in this repository is in the public domain.
