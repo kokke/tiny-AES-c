@@ -540,7 +540,7 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
   int bi;
   for (i = 0, bi = AES_BLOCKLEN; i < length; ++i, ++bi)
   {
-    if (bi == AES_BLOCKLEN) /* we need to regen xor compliment in buffer */
+    if (bi == AES_BLOCKLEN) /* we need to regenerate xor compliment in buffer */
     {
       
       memcpy(buffer, ctx->Iv, AES_BLOCKLEN);
