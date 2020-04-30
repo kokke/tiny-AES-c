@@ -154,13 +154,7 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
   uint8_t tempa[4]; // Used for the column/row operations
   
   // The first round key is the key itself.
-  for (i = 0; i < Nk; ++i)
-  {
-    RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
-    RoundKey[(i * 4) + 1] = Key[(i * 4) + 1];
-    RoundKey[(i * 4) + 2] = Key[(i * 4) + 2];
-    RoundKey[(i * 4) + 3] = Key[(i * 4) + 3];
-  }
+  memcpy(RoundKey,Key,4*Nk);
 
   // All other round keys are found from the previous round keys.
   for (i = Nk; i < Nb * (Nr + 1); ++i)
@@ -298,7 +292,16 @@ static void ShiftRows(state_t* state)
 
 static uint8_t xtime(uint8_t x)
 {
-  return ((x<<1) ^ (((x>>7) & 1) * 0x1b));
+  //from http://www.ti.com/tool/AES-128
+  signed char temp;
+  // cast to signed value
+  temp = (signed char) x;
+  // if MSB is 1, then this will signed extend and fill the temp variable with 1's
+  temp = temp >> 7;
+  // AND with the reduction variable
+  temp = temp & 0x1b;
+  // finally shift and reduce the value
+  return ((x << 1) ^ temp);
 }
 
 // MixColumns function mixes the columns of the state matrix
