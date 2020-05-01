@@ -290,18 +290,9 @@ static void ShiftRows(state_t* state)
   (*state)[1][3] = temp;
 }
 
-static uint8_t xtime(uint8_t x)
+static uint8_t xtime(uint8_t value)
 {
-  //from http://www.ti.com/tool/AES-128
-  signed char temp;
-  // cast to signed value
-  temp = (signed char) x;
-  // if MSB is 1, then this will signed extend and fill the temp variable with 1's
-  temp = temp >> 7;
-  // AND with the reduction variable
-  temp = temp & 0x1b;
-  // finally shift and reduce the value
-  return ((x << 1) ^ temp);
+	return ( (value << 1) ^ (( - (value >> 7)) & 0x1b) );
 }
 
 // MixColumns function mixes the columns of the state matrix
