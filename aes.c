@@ -479,12 +479,7 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf)
 
 #endif // #if defined(ECB) && (ECB == 1)
 
-
-
-
-
-#if defined(CBC) && (CBC == 1)
-
+#if (defined(CBC) && (CBC == 1)) || (defined(CCM) && (CCM == 1))
 
 static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
 {
@@ -494,6 +489,12 @@ static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
     buf[i] ^= Iv[i];
   }
 }
+
+#endif // #if (defined(CBC) && (CBC == 1)) || (defined(CCM) && (CCM == 1))
+
+
+
+#if defined(CBC) && (CBC == 1)
 
 void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length)
 {
@@ -567,3 +568,94 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
 
 #endif // #if defined(CTR) && (CTR == 1)
 
+#if defined(CCM) && (CCM == 1)
+
+static void IncCounter(uint8_t* counter_block)
+{
+    for (int_fast8_t i = ((int8_t)AES_BLOCKLEN - 1); i >= 0; --i) {
+        if (counter_block[i] == 0xFFu) {
+            counter_block[i] = 0;
+        } else {
+            counter_block[i]++;
+            break;
+        }
+    }
+}
+
+static void CCM_Xcrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len, int enc)
+{
+    for (uintptr_t i = 0u; i < len; ++i) {
+        if (ctx->byte_pos >= AES_BLOCKLEN) {
+            ctx->byte_pos = 0u;
+            Cipher((state_t*)ctx->cbc_buf, ctx->round_key);
+            memcpy(ctx->ctr_buf, ctx->counter, AES_BLOCKLEN);
+            Cipher((state_t*)ctx->ctr_buf, ctx->round_key);
+            IncCounter(ctx->counter);
+        }
+        if (enc){
+            ctx->cbc_buf[ctx->byte_pos] ^= buf[i];
+            buf[i] ^= ctx->ctr_buf[ctx->byte_pos];
+        } else {
+            buf[i] ^= ctx->ctr_buf[ctx->byte_pos];
+            ctx->cbc_buf[ctx->byte_pos] ^= buf[i];
+        }
+        ctx->byte_pos++;
+    }
+}
+
+void AES_CCM_init(AES_CCM_ctx* ctx, const uint8_t key[AES_KEYLEN],
+                  const uint8_t nonce[], uint8_t nonce_len,
+                  uint32_t data_len, uint8_t tag_len)
+{
+    KeyExpansion(ctx->round_key, key);
+    ctx->ctr_len = (uint8_t)((AES_BLOCKLEN - (uint8_t)1u) - nonce_len);
+    uint8_t tag_bits_L = ctx->ctr_len - (uint8_t)1u;
+    uint8_t tag_bits_M = (uint8_t)(8u * (tag_len - 2u) / 2u);
+    ctx->cbc_buf[0u] = tag_bits_M + tag_bits_L;
+    ctx->counter[0u] = tag_bits_L;
+    for (uint_fast8_t i = 0u; i < nonce_len; ++i) {
+        ctx->cbc_buf[i + 1u] = nonce[i];
+        ctx->counter[i + 1u] = nonce[i];
+    }
+    uint32_t tmp = data_len;
+    for (uint_fast8_t i = 0u; i < ctx->ctr_len; ++i) {
+        uint_fast8_t pos = (AES_BLOCKLEN - 1u) - i;
+        ctx->cbc_buf[pos] = (uint8_t)tmp;
+        tmp = tmp >> 8u;
+        ctx->counter[pos] = 0u;
+    }
+    IncCounter(ctx->counter);
+    ctx->byte_pos = AES_BLOCKLEN;
+}
+
+void AES_CCM_encrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len)
+{
+    CCM_Xcrypt(ctx, buf, len, 1);
+}
+
+void AES_CCM_decrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len)
+{
+    CCM_Xcrypt(ctx, buf, len, 0);
+}
+
+void CCM_generate_tag(AES_CCM_ctx* ctx)
+{
+    memset(ctx->counter + AES_BLOCKLEN - ctx->ctr_len, 0, ctx->ctr_len);
+    memcpy(ctx->ctr_buf, ctx->counter, AES_BLOCKLEN);
+    Cipher((state_t*)ctx->ctr_buf, ctx->round_key);
+    Cipher((state_t*)ctx->cbc_buf, ctx->round_key);
+    XorWithIv(ctx->cbc_buf, ctx->ctr_buf);
+}
+
+void AES_CCM_generate_tag(AES_CCM_ctx* ctx, uint8_t tag[AES_BLOCKLEN], uint8_t tag_len)
+{
+    CCM_generate_tag(ctx);
+    memcpy(tag, ctx->cbc_buf, tag_len);
+}
+
+bool AES_CCM_verify_tag(AES_CCM_ctx* ctx, uint8_t tag[], uint8_t tag_len)
+{
+    return memcmp(tag, ctx->cbc_buf, tag_len) == 0;
+}
+
+#endif // #if defined(CTR) && (CTR == 1)

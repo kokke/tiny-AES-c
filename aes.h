@@ -2,6 +2,7 @@
 #define _AES_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
@@ -20,6 +21,10 @@
 
 #ifndef CTR
   #define CTR 1
+#endif
+
+#ifndef CCM
+  #define CCM 1
 #endif
 
 
@@ -83,6 +88,32 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 // NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
 //        no IV should ever be reused with the same key 
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
+
+#endif // #if defined(CTR) && (CTR == 1)
+
+#if defined(CCM) && (CCM == 1)
+
+typedef struct {
+    uint8_t round_key[AES_keyExpSize];
+    uint8_t cbc_buf[AES_BLOCKLEN];
+    uint8_t counter[AES_BLOCKLEN];
+    uint8_t ctr_buf[AES_BLOCKLEN];
+    uint8_t byte_pos;
+    uint8_t ctr_len;
+} AES_CCM_ctx;
+// nonce_len should be between 7..13 bytes.
+// Adata is not supported yet.
+// AES_CCM_Encrypt and AES_CCM_Decrypt could be called multiple times.
+// The sum of len MUST be data_len given in AES_CCM_Init.
+// The tag_len in AES_CCM_Init and AES_CCM_GenerateTag MUST be the same.
+// After calling AES_CCM_GenerateTag or AES_CCM_verify_tag, ctx MUST be initialized before reused.
+void AES_CCM_init(AES_CCM_ctx* ctx, const uint8_t key[AES_KEYLEN],
+                  const uint8_t nonce[], uint8_t nonce_len,
+                  uint32_t data_len, uint8_t tag_len);
+void AES_CCM_encrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len);
+void AES_CCM_decrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len);
+void AES_CCM_generate_tag(AES_CCM_ctx* ctx, uint8_t tag[], uint8_t tag_len);
+bool AES_CCM_verify_tag(AES_CCM_ctx* ctx, uint8_t tag[], uint8_t tag_len);
 
 #endif // #if defined(CTR) && (CTR == 1)
 
