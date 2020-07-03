@@ -2,6 +2,7 @@
 #define _AES_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
@@ -105,13 +106,14 @@ typedef struct {
 // AES_CCM_Encrypt and AES_CCM_Decrypt could be called multiple times.
 // The sum of len MUST be data_len given in AES_CCM_Init.
 // The tag_len in AES_CCM_Init and AES_CCM_GenerateTag MUST be the same.
-// After calling AES_CCM_GenerateTag, ctx MUST be initialized before reusing it.
+// After calling AES_CCM_GenerateTag or AES_CCM_verify_tag, ctx MUST be initialized before reused.
 void AES_CCM_init(AES_CCM_ctx* ctx, const uint8_t key[AES_KEYLEN],
                   const uint8_t nonce[], uint8_t nonce_len,
                   uint32_t data_len, uint8_t tag_len);
 void AES_CCM_encrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len);
 void AES_CCM_decrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len);
 void AES_CCM_generate_tag(AES_CCM_ctx* ctx, uint8_t tag[], uint8_t tag_len);
+bool AES_CCM_verify_tag(AES_CCM_ctx* ctx, uint8_t tag[], uint8_t tag_len);
 
 #endif // #if defined(CTR) && (CTR == 1)
 

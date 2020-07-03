@@ -638,14 +638,24 @@ void AES_CCM_decrypt(AES_CCM_ctx* ctx, uint8_t buf[], uint32_t len)
     CCM_Xcrypt(ctx, buf, len, 0);
 }
 
-void AES_CCM_generate_tag(AES_CCM_ctx* ctx, uint8_t tag[AES_BLOCKLEN], uint8_t tag_len)
+void CCM_generate_tag(AES_CCM_ctx* ctx)
 {
     memset(ctx->counter + AES_BLOCKLEN - ctx->ctr_len, 0, ctx->ctr_len);
     memcpy(ctx->ctr_buf, ctx->counter, AES_BLOCKLEN);
     Cipher((state_t*)ctx->ctr_buf, ctx->round_key);
     Cipher((state_t*)ctx->cbc_buf, ctx->round_key);
     XorWithIv(ctx->cbc_buf, ctx->ctr_buf);
+}
+
+void AES_CCM_generate_tag(AES_CCM_ctx* ctx, uint8_t tag[AES_BLOCKLEN], uint8_t tag_len)
+{
+    CCM_generate_tag(ctx);
     memcpy(tag, ctx->cbc_buf, tag_len);
+}
+
+bool AES_CCM_verify_tag(AES_CCM_ctx* ctx, uint8_t tag[], uint8_t tag_len)
+{
+    return memcmp(tag, ctx->cbc_buf, tag_len) == 0;
 }
 
 #endif // #if defined(CTR) && (CTR == 1)

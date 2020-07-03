@@ -411,7 +411,7 @@ static int test_decrypt_ccm(void)
     printf("CCM decrypt: ");
 
     if ((0 == memcmp((char *)out, (char *)in, sizeof(out)))
-        && (0 == memcmp((char *)tag, (char *)tag_out, sizeof(tag))))
+        && (AES_CCM_verify_tag(&ctx, tag, 16)))
     {
         printf("SUCCESS!\n");
         return (0);
