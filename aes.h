@@ -8,6 +8,7 @@
 //
 // CBC enables AES encryption in CBC-mode of operation.
 // CTR enables encryption in counter-mode.
+// CMAC enables AES-CMAC (Cipher-based Message Authentication Code) algorithm.
 // ECB enables the basic ECB 16-byte block algorithm. All can be enabled simultaneously.
 
 // The #ifndef-guard allows it to be configured before #include'ing or at compile time.
@@ -21,6 +22,10 @@
 
 #ifndef CTR
   #define CTR 1
+#endif
+
+#ifndef CMAC
+  #define CMAC 1
 #endif
 
 
@@ -86,6 +91,17 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
+
+
+#if defined(CMAC) && (CMAC == 1)
+
+// Input buffer of any size (zero included) accepted.
+// Output buffer can overlap or be the same as input buffer.
+// No more than AES_BLOCKLEN bytes will be written into output buffer
+// as a result of the operation.
+void AES_CMAC_generate(const struct AES_ctx* ctx, const uint8_t* buf, size_t length, uint8_t* buf_out, size_t length_out);
+
+#endif // #if defined(CMAC) && (CMAC == 1)
 
 
 #endif // _AES_H_

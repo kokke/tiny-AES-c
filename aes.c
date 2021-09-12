@@ -461,6 +461,19 @@ static void InvCipher(state_t* state, const uint8_t* RoundKey)
 }
 #endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 
+#if (defined(CBC) && CBC == 1) || (defined(CMAC) && CMAC == 1)
+static void Xor(uint8_t* a, const uint8_t* b)
+{
+  /* The block in AES is always 128bit no matter the key size */
+  uint8_t i;
+  for (i = 0; i < AES_BLOCKLEN; ++i)
+  {
+    a[i] ^= b[i];
+  }
+}
+#endif /* #if (defined(CBC) && CBC == 1) || (defined(CMAC) && CMAC == 1) */
+
+
 /*****************************************************************************/
 /* Public functions:                                                         */
 /*****************************************************************************/
@@ -489,22 +502,13 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf)
 #if defined(CBC) && (CBC == 1)
 
 
-static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
-{
-  uint8_t i;
-  for (i = 0; i < AES_BLOCKLEN; ++i) // The block in AES is always 128bit no matter the key size
-  {
-    buf[i] ^= Iv[i];
-  }
-}
-
 void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, size_t length)
 {
   size_t i;
   uint8_t *Iv = ctx->Iv;
   for (i = 0; i < length; i += AES_BLOCKLEN)
   {
-    XorWithIv(buf, Iv);
+    Xor(buf, Iv);
     Cipher((state_t*)buf, ctx->RoundKey);
     Iv = buf;
     buf += AES_BLOCKLEN;
@@ -521,7 +525,7 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
   {
     memcpy(storeNextIv, buf, AES_BLOCKLEN);
     InvCipher((state_t*)buf, ctx->RoundKey);
-    XorWithIv(buf, ctx->Iv);
+    Xor(buf, ctx->Iv);
     memcpy(ctx->Iv, storeNextIv, AES_BLOCKLEN);
     buf += AES_BLOCKLEN;
   }
@@ -569,4 +573,98 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
 }
 
 #endif // #if defined(CTR) && (CTR == 1)
+
+
+#if defined(CMAC) && (CMAC == 1)
+
+#define AES_CMAC_MSB 0x80
+#define AES_CMAC_RB 0x87
+
+static void ShiftLeft(uint8_t* buf)
+{
+  uint8_t i;
+  for (i = 0; i < AES_BLOCKLEN - 1; ++i)
+  {
+    buf[i] = (buf[i] << 1) | (buf[i + 1] >> 7);
+  }
+  buf[AES_BLOCKLEN - 1] <<= 1;
+}
+
+static uint8_t* GenerateSubkey(uint8_t* key)
+{
+  if (!(key[0] & AES_CMAC_MSB))
+  {
+    ShiftLeft(key);
+  }
+  else
+  {
+    ShiftLeft(key);
+    key[AES_BLOCKLEN - 1] ^= AES_CMAC_RB;
+  }
+  return key;
+}
+
+void AES_CMAC_generate(const struct AES_ctx* ctx, const uint8_t* buf, size_t length, uint8_t* buf_out, size_t length_out)
+{
+  uint8_t block[AES_BLOCKLEN] = {0};
+  uint8_t last[AES_BLOCKLEN] = {0};
+  uint8_t L[AES_BLOCKLEN] = {0};
+  uint8_t *K1, *K2;
+  size_t i;
+  /* Number of blocks to process. */
+  size_t n = length / AES_BLOCKLEN;
+  /* Number of octets in the last block. */
+  uint8_t rem = length % AES_BLOCKLEN;
+  if (rem > 0)
+  {
+    ++n;
+  }
+  else if (n > 0)
+  {
+    /* Last block is complete. */
+    rem = AES_BLOCKLEN;
+  }
+  if (n == 0)
+  {
+    /* Zero length. */
+    n = 1;
+  }
+
+  for (i = 0; i < n - 1; ++i)
+  {
+    Xor(block, buf);
+    Cipher((state_t*)block, ctx->RoundKey);
+    buf += AES_BLOCKLEN;
+  }
+
+  memcpy(last, buf, rem);
+
+  Cipher((state_t*)L, ctx->RoundKey);
+  K1 = GenerateSubkey(L);
+
+  if (rem == AES_BLOCKLEN)
+  {
+    /* Last block is complete, using first subkey. */
+    Xor(last, K1);
+  }
+  else
+  {
+    /* Last block is not complete. Padding and using second subkey. */
+    last[rem] = AES_CMAC_MSB;
+    K2 = GenerateSubkey(K1);
+    Xor(last, K2);
+  }
+
+  Xor(block, last);
+  Cipher((state_t*)block, ctx->RoundKey);
+
+  if (length_out > sizeof(block))
+  {
+    length_out = sizeof(block);
+  }
+  memmove(buf_out, block, length_out);
+}
+
+
+#endif /* #if defined(CMAC) && (CMAC == 1) */
 
