@@ -580,25 +580,19 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
 #define AES_CMAC_MSB 0x80
 #define AES_CMAC_RB 0x87
 
-static void ShiftLeft(uint8_t* buf)
-{
-  uint8_t i;
-  for (i = 0; i < AES_BLOCKLEN - 1; ++i)
-  {
-    buf[i] = (buf[i] << 1) | (buf[i + 1] >> 7);
-  }
-  buf[AES_BLOCKLEN - 1] <<= 1;
-}
-
 static uint8_t* GenerateSubkey(uint8_t* key)
 {
-  if (!(key[0] & AES_CMAC_MSB))
+  uint8_t msb = key[0] & AES_CMAC_MSB;
+  uint8_t i;
+
+  for (i = 0; i < AES_BLOCKLEN - 1; ++i)
   {
-    ShiftLeft(key);
+    key[i] = (key[i] << 1) | (key[i + 1] >> 7);
   }
-  else
+  key[AES_BLOCKLEN - 1] <<= 1;
+
+  if (msb)
   {
-    ShiftLeft(key);
     key[AES_BLOCKLEN - 1] ^= AES_CMAC_RB;
   }
   return key;
@@ -607,27 +601,25 @@ static uint8_t* GenerateSubkey(uint8_t* key)
 void AES_CMAC_generate(const struct AES_ctx* ctx, const uint8_t* buf, size_t length, uint8_t* buf_out, size_t length_out)
 {
   uint8_t block[AES_BLOCKLEN] = {0};
-  uint8_t last[AES_BLOCKLEN] = {0};
   uint8_t L[AES_BLOCKLEN] = {0};
-  uint8_t *K1, *K2;
+  uint8_t *K1, *K2, *last;
   size_t i;
   /* Number of blocks to process. */
-  size_t n = length / AES_BLOCKLEN;
+  size_t n = (length + AES_BLOCKLEN - 1) / AES_BLOCKLEN;
   /* Number of octets in the last block. */
   uint8_t rem = length % AES_BLOCKLEN;
-  if (rem > 0)
+  if (rem == 0)
   {
-    ++n;
-  }
-  else if (n > 0)
-  {
-    /* Last block is complete. */
-    rem = AES_BLOCKLEN;
-  }
-  if (n == 0)
-  {
-    /* Zero length. */
-    n = 1;
+    if (n > 0)
+    {
+      /* Last block is complete. */
+      rem = AES_BLOCKLEN;
+    }
+    else
+    {
+      /* Zero length. */
+      n = 1;
+    }
   }
 
   for (i = 0; i < n - 1; ++i)
@@ -637,32 +629,33 @@ void AES_CMAC_generate(const struct AES_ctx* ctx, const uint8_t* buf, size_t len
     buf += AES_BLOCKLEN;
   }
 
-  memcpy(last, buf, rem);
-
   Cipher((state_t*)L, ctx->RoundKey);
   K1 = GenerateSubkey(L);
 
   if (rem == AES_BLOCKLEN)
   {
     /* Last block is complete, using first subkey. */
-    Xor(last, K1);
+    last = K1;
+    Xor(last, buf);
   }
   else
   {
     /* Last block is not complete. Padding and using second subkey. */
-    last[rem] = AES_CMAC_MSB;
     K2 = GenerateSubkey(K1);
-    Xor(last, K2);
+    last = K2;
+    for (i = 0; i < rem; ++i) {
+      last[i] ^= buf[i];
+    }
+    last[i] ^= AES_CMAC_MSB;
   }
 
   Xor(block, last);
   Cipher((state_t*)block, ctx->RoundKey);
 
-  if (length_out > sizeof(block))
+  for (i = 0; i < sizeof(block) && i < length_out; ++i)
   {
-    length_out = sizeof(block);
+    buf_out[i] = block[i];
   }
-  memmove(buf_out, block, length_out);
 }
 
 
