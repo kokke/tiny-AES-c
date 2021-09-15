@@ -615,7 +615,8 @@ void AES_CMAC_generate(const struct AES_ctx* ctx, const uint8_t* buf, size_t len
       GenerateSubkey(L);
       L[length] ^= AES_CMAC_MSB;
     }
-    if (length <= AES_BLOCKLEN) {
+    if (length <= AES_BLOCKLEN)
+    {
       for (i = 0; i < length; ++i)
       {
         L[i] ^= buf[i];
