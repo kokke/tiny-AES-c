@@ -600,7 +600,7 @@ static void GenerateSubkey(uint8_t* key)
 void AES_CMAC_generate(const struct AES_ctx* ctx, const uint8_t* buf, size_t length, uint8_t* buf_out, size_t length_out)
 {
   uint8_t block[AES_BLOCKLEN] = {0};
-  uint8_t L[AES_BLOCKLEN] = {0};
+  uint8_t L[AES_BLOCKLEN] = {0}; /* Nullify to make all-zero input block required for the first subkey derivation. */
   size_t i;
 
   /* First subkey. */
@@ -631,7 +631,7 @@ void AES_CMAC_generate(const struct AES_ctx* ctx, const uint8_t* buf, size_t len
   }
   while (length);
 
-  for (i = 0; i < sizeof(block) && i < length_out; ++i)
+  for (i = 0; (i < sizeof(block)) && (i < length_out); ++i)
   {
     buf_out[i] = block[i];
   }
