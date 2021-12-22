@@ -55,16 +55,6 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
     #define Nr 10       // The number of rounds in AES Cipher.
 #endif
 
-// jcallan@github points out that declaring Multiply as a function 
-// reduces code size considerably with the Keil ARM compiler.
-// See this link for more information: https://github.com/kokke/tiny-AES-C/pull/3
-#ifndef MULTIPLY_AS_A_FUNCTION
-  #define MULTIPLY_AS_A_FUNCTION 0
-#endif
-
-
-
-
 /*****************************************************************************/
 /* Private variables:                                                        */
 /*****************************************************************************/
@@ -312,29 +302,6 @@ static void MixColumns(state_t* state)
   }
 }
 
-// Multiply is used to multiply numbers in the field GF(2^8)
-// Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
-//       The compiler seems to be able to vectorize the operation better this way.
-//       See https://github.com/kokke/tiny-AES-c/pull/34
-#if MULTIPLY_AS_A_FUNCTION
-static uint8_t Multiply(uint8_t x, uint8_t y)
-{
-  return (((y & 1) * x) ^
-       ((y>>1 & 1) * xtime(x)) ^
-       ((y>>2 & 1) * xtime(xtime(x))) ^
-       ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
-       ((y>>4 & 1) * xtime(xtime(xtime(xtime(x)))))); /* this last call to xtime() can be omitted */
-  }
-#else
-#define Multiply(x, y)                                \
-      (  ((y & 1) * x) ^                              \
-      ((y>>1 & 1) * xtime(x)) ^                       \
-      ((y>>2 & 1) * xtime(xtime(x))) ^                \
-      ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^         \
-      ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))   \
-
-#endif
-
 #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 /*
 static uint8_t getSBoxInvert(uint8_t num)
@@ -350,18 +317,35 @@ static uint8_t getSBoxInvert(uint8_t num)
 static void InvMixColumns(state_t* state)
 {
   int i;
-  uint8_t a, b, c, d;
+  uint8_t a, b, c, d, T, X;
   for (i = 0; i < 4; ++i)
   { 
     a = (*state)[i][0];
     b = (*state)[i][1];
     c = (*state)[i][2];
     d = (*state)[i][3];
-
-    (*state)[i][0] = Multiply(a, 0x0e) ^ Multiply(b, 0x0b) ^ Multiply(c, 0x0d) ^ Multiply(d, 0x09);
-    (*state)[i][1] = Multiply(a, 0x09) ^ Multiply(b, 0x0e) ^ Multiply(c, 0x0b) ^ Multiply(d, 0x0d);
-    (*state)[i][2] = Multiply(a, 0x0d) ^ Multiply(b, 0x09) ^ Multiply(c, 0x0e) ^ Multiply(d, 0x0b);
-    (*state)[i][3] = Multiply(a, 0x0b) ^ Multiply(b, 0x0d) ^ Multiply(c, 0x09) ^ Multiply(d, 0x0e);
+    // Let "*" denotes polynomial multiplication modulo x^4+1 over GF(2^8)
+    // Let "+" denotes polynimial addition over GF(2^8) (XOR)
+    // xtime(X) is X*2
+    // A' = (A*8 + A*4 + A*2) + (B*8 + B*2 + B) + (C*8 + C*4 + C) + (D*8 + D)
+    // B' = (A*8 + A) + (B*8 + B*4 + B*2) + (C*8 + C*2 + C) + (D*8 + D*4 + D)
+    // C' = (A*8 + A*4 + A) + (B*8 + B) + (C*8 + C*4 + C*2) + (D*8 + D*2 + D)
+    // D' = (A*8 + A*2 + A) + (B*8 + B*4 + B) + (C*8 + C) + (D*8 + D*4 + D*2)
+    // Let T = (A + B + C + D)*8 + (A + B + C + D)
+    // Then
+    // A' = T + (A + C)*4 + (A + B)*2 + A
+    // B' = T + (B + D)*4 + (B + C)*2 + B
+    // C' = T + (C + A)*4 + (C + D)*2 + C
+    // D' = T + (D + B)*4 + (D + A)*2 + D
+    // Let X = (A + C)*4 or (B + D)*4
+    T = a ^ b ^ c ^ d;
+    T ^= xtime(xtime(xtime(T)));
+    X = xtime(xtime(a ^ c));
+    (*state)[i][0] = T ^ X ^ xtime(a ^ b) ^ a;
+    (*state)[i][2] = T ^ X ^ xtime(c ^ d) ^ c;
+    X = xtime(xtime(b ^ d));
+    (*state)[i][1] = T ^ X ^ xtime(b ^ c) ^ b;
+    (*state)[i][3] = T ^ X ^ xtime(d ^ a) ^ d;
   }
 }
 
