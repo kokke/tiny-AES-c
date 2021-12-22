@@ -4,6 +4,19 @@
 #include <stdint.h>
 #include <stddef.h>
 
+
+// Platform-specific optimizations
+
+// On AVR platforms, use flash memory to store static lookup tables, to conserve SRAM
+#ifdef __AVR_ARCH__
+  #include <avr/pgmspace.h>
+#else
+  // Generic implementation: Emulate PROGMEM using regular RAM
+  #define PROGMEM
+  inline uint8_t pgm_read_byte(const uint8_t* p) { return(*p); }
+#endif
+
+
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
 // CBC enables AES encryption in CBC-mode of operation.
