@@ -2,6 +2,7 @@
 #define _AES_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
@@ -27,7 +28,7 @@
 //#define AES192 1
 //#define AES256 1
 
-#define AES_BLOCKLEN 16 //Block length in bytes AES is 128b block only
+#define AES_BLOCKLEN 16 // Block length in bytes - AES is 128b block only
 
 #if defined(AES256) && (AES256 == 1)
     #define AES_KEYLEN 32
@@ -69,8 +70,8 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf);
 // Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
 // NOTES: you need to set IV in ctx via AES_init_ctx_iv() or AES_ctx_set_iv()
 //        no IV should ever be reused with the same key 
-void AES_CBC_encrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
-void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
+void AES_CBC_encrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
+void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 
 #endif // #if defined(CBC) && (CBC == 1)
 
@@ -82,9 +83,9 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 // Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
 // NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
 //        no IV should ever be reused with the same key 
-void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
+void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
 
 
-#endif //_AES_H_
+#endif // _AES_H_
