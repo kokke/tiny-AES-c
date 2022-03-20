@@ -486,7 +486,7 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf)
 
 
 
-#if defined(CBC) && (CBC == 1)
+#if defined(CBC) && (CBC == 1) || (defined(OFB) && (OFB == 1)) 
 
 
 static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
@@ -497,7 +497,9 @@ static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
     buf[i] ^= Iv[i];
   }
 }
+#endif // #if defined(CBC) && (CBC == 1) || (defined(OFB) && (OFB == 1))
 
+#if defined(CBC) && (CBC == 1) 
 void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, size_t length)
 {
   size_t i;
@@ -570,3 +572,23 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
 
 #endif // #if defined(CTR) && (CTR == 1)
 
+#if defined(OFB) && (OFB == 1)
+
+// Same function for encrypting as for decrypting. 
+// NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
+//        no IV should ever be reused with the same key
+void AES_OFB_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length) 
+{
+  size_t i;
+  uint8_t *Iv = ctx->Iv;
+  for (i = 0; i < length; i += AES_BLOCKLEN)
+  {
+    Cipher((state_t*)Iv, ctx->RoundKey);
+	  XorWithIv(buf, Iv);
+    buf += AES_BLOCKLEN;
+  }
+  /* store Iv in ctx for next call */
+  memcpy(ctx->Iv, Iv, AES_BLOCKLEN);
+}
+
+#endif // #if defined(OFB) && (OFB == 1)
