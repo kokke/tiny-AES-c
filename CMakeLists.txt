@@ -8,7 +8,6 @@ target_sources(${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/aes.c
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/aes.h
-        ${CMAKE_CURRENT_LIST_DIR}/aes.hpp
 )
 
 target_include_directories(${PROJECT_NAME}
