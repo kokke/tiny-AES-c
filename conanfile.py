@@ -12,7 +12,7 @@ class TinyAesCConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "*.c", '*.h', '*.hpp']
+    exports_sources = ["CMakeLists.txt", "*.c", '*.h']
     exports = ["unlicense.txt"]
 
     _options_dict = {
@@ -65,7 +65,6 @@ class TinyAesCConan(ConanFile):
 
     def package(self):
         self.copy("*.h", dst="include")
-        self.copy("*.hpp", dst="include")
         self.copy("*.a", dst="lib", keep_path=False)
         self.copy("unlicense.txt")
 
