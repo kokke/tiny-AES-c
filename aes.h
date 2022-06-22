@@ -1,6 +1,10 @@
 #ifndef _AES_H_
 #define _AES_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -62,7 +66,7 @@ void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv);
 void AES_ECB_encrypt(const struct AES_ctx* ctx, uint8_t* buf);
 void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf);
 
-#endif // #if defined(ECB) && (ECB == !)
+#endif // #if defined(ECB) && (ECB == 1)
 
 
 #if defined(CBC) && (CBC == 1)
@@ -86,6 +90,10 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
+
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 
 
 #endif // _AES_H_
