@@ -552,7 +552,7 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
       /* Increment Iv and handle overflow */
       for (bi = (AES_BLOCKLEN - 1); bi >= 0; --bi)
       {
-	/* inc will overflow */
+        /* inc will overflow */
         if (ctx->Iv[bi] == 255)
         {
           ctx->Iv[bi] = 0;
