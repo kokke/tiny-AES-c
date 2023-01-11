@@ -88,7 +88,7 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 //        no IV should ever be reused with the same key 
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
 
-#endif // #if defined(CFB) && (CFB == 1)
+#endif // #if defined(CTR) && (CTR == 1)
 
 
 #if defined(CFB) && (CFB == 1)
