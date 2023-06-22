@@ -461,6 +461,42 @@ static void InvCipher(state_t* state, const uint8_t* RoundKey)
 }
 #endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 
+#if defined(CTR_SEEK) && (CTR_SEEK == 1)
+
+// Adds two AES_BLOCKLEN sized numbers together
+static void AddCounterBlock(const uint8_t* blkLeft, const uint8_t* blkRight, uint8_t* blkOut)
+{
+	uint16_t carry;
+	int i;
+
+	carry = 0;
+	for (i = AES_BLOCKLEN - 1; i >= 0; --i)
+	{
+		uint16_t sum = carry + blkLeft[i] + blkRight[i];
+		blkOut[i] = sum & 0xFF;
+		carry = (sum >> 8) & 0xFF;
+	}
+}
+
+// Encodes a size_t into a buffer as little-endian
+static void EncodeAsCounterBlock(size_t counter, uint8_t* block)
+{
+#define NUM_COUNTER_BYTES (sizeof(size_t) < AES_BLOCKLEN ? sizeof(size_t) : sizeof(size_t))
+	memset(block, 0, AES_BLOCKLEN);
+	
+	for (int i = 0; i < NUM_COUNTER_BYTES; ++i)
+	{
+		int arrayIdx = (AES_BLOCKLEN - 1) - i;
+		int byteShift = i * 8;
+		size_t byteMask = (size_t)0xFF << byteShift;
+
+		block[arrayIdx] = ((counter & byteMask) >> byteShift) & 0xFF;
+	}
+#undef NUM_COUNTER_BYTES
+}
+
+#endif // #if defined(CTR_SEEK) && (CTR_SEEK == 1)
+
 /*****************************************************************************/
 /* Public functions:                                                         */
 /*****************************************************************************/
@@ -569,4 +605,45 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
 }
 
 #endif // #if defined(CTR) && (CTR == 1)
+
+
+
+#if defined(CTR_SEEK) && (CTR_SEEK == 1)
+
+// Applies the same encryption process as AES_CTR_xcrypt_buffer but to a single block from a
+// specific position in the stream. 
+void AES_CTR_xcrypt_block_at_position(const struct AES_ctx* ctx, uint8_t* blkBuf, size_t blkIndex)
+{
+	uint8_t buffer[AES_BLOCKLEN]; // holds block index, Iv at given index then the xor block
+	int i;
+	
+	EncodeAsCounterBlock(blkIndex, buffer);
+	AddCounterBlock(buffer, ctx->Iv, buffer); // add index to Iv 
+
+	Cipher((state_t*)buffer, ctx->RoundKey); // create xor'able block
+
+	for (i = 0; i < AES_BLOCKLEN; ++i)
+	{
+		blkBuf[i] = (blkBuf[i] ^ buffer[i]);
+	}
+}
+
+// Because AES_CTR_xcrypt_block_at_position uses size_t for the block index, this function is provided for
+// indexing the full size of the stream using an array of bytes representing a little-endian integer which is the index. 
+void AES_CTR_xcrypt_block_at_position_extended(const struct AES_ctx* ctx, uint8_t* blkBuf, const uint8_t* blkIndexBuf)
+{
+	uint8_t buffer[AES_BLOCKLEN]; // Iv at given index then the xor block
+	int i;
+
+	AddCounterBlock(blkIndexBuf, ctx->Iv, buffer); // add index to Iv
+
+	Cipher((state_t*)buffer, ctx->RoundKey); // create xor'able block
+
+	for (i = 0; i < AES_BLOCKLEN; ++i)
+	{
+		blkBuf[i] = (blkBuf[i] ^ buffer[i]);
+	}
+}
+
+#endif
 
