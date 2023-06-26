@@ -8,6 +8,7 @@
 //
 // CBC enables AES encryption in CBC-mode of operation.
 // CTR enables encryption in counter-mode.
+// CTR_SEEK enables out of order encryption in counter-mode 
 // ECB enables the basic ECB 16-byte block algorithm. All can be enabled simultaneously.
 
 // The #ifndef-guard allows it to be configured before #include'ing or at compile time.
@@ -23,6 +24,9 @@
   #define CTR 1
 #endif
 
+#ifndef CTR_SEEK
+  #define CTR_SEEK 1
+#endif
 
 #define AES128 1
 //#define AES192 1
@@ -86,6 +90,32 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
+
+
+#if defined(CTR_SEEK) && (CTR_SEEK == 1)
+
+// Same function for encrypting as for decrypting.
+// Similar to AES_CTR_xcrypt_buffer however can be used to encrypt/decrypt specific blocks without
+// encrypt/decrypt the previous blocks beforehand.
+// 'blkBuf' specifies which block should be encrypted/decrypted 
+// 'blkIndex' specifies the block to be encrypted/decrypted MUST be of size AES_BLOCKLEN
+// Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+// NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv().
+//        no IV should ever be reused with the same key.
+//		  blkIndex allows for counters up to maximum size of size_t, for bigger indices use 
+//		  AES_CTR_xcrypt_block_at_position_extended().
+void AES_CTR_xcrypt_block_at_position(const struct AES_ctx* ctx, uint8_t* blkBuf, size_t blkIndex);
+
+// Same function for encrypting as for decrypting.
+// Functions the same as AES_CTR_xcrypt_block_at_position however can be used with streams bigger than size_t
+// 'blkIndexBuf' specifies the index of which block to be encrypted/decrypted MUST be of size AES_BLOCKLEN
+//				 and encoded as little-endian.			 
+// Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+// NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
+//        no IV should ever be reused with the same key
+void AES_CTR_xcrypt_block_at_position_extended(const struct AES_ctx* ctx, uint8_t* blkBuf, const uint8_t* blkIndexBuf);
+
+#endif // #if defined(CTR_SEEK) && (CTR_SEEK == 1)
 
 
 #endif // _AES_H_

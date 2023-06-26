@@ -33,6 +33,9 @@ class TinyAesCConan(ConanFile):
 
         # enable encryption in counter-mode
         "CTR": [True, False],
+
+        # enable encryption in counter-mode with seekable counter
+        "CTR_SEEK": [True, False],
     }
 
     options = _options_dict
@@ -43,12 +46,13 @@ class TinyAesCConan(ConanFile):
         "AES256": False,
         "CBC": True,
         "ECB": True,
-        "CTR": True
+        "CTR": True,
+        "CTR_SEEK": True
     }
 
     def configure(self):
         if not self.options.CBC and not self.options.ECB and not self.options.CTR:
-            raise ConanException("Need to at least specify one of CBC, ECB or CTR modes")
+            raise ConanException("Need to at least specify one of CBC, ECB, CTR, CTR-SEEK modes")
 
         if not self.options.AES128 and not self.options.AES192 and not self.options.AES256:
             raise ConanException("Need to at least specify one of AES{128, 192, 256} modes")
