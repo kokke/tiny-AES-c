@@ -1,4 +1,4 @@
 /*.o
 /test.elf
 /test.map
-**/build
+test_package/build
