@@ -483,20 +483,18 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf)
 #endif // #if defined(ECB) && (ECB == 1)
 
 
-
-
-
-#if defined(CBC) && (CBC == 1)
-
-
+#if (defined(CBC) && (CBC == 1)) || (defined(CFB) && (CFB == 1))
 static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
 {
-  uint8_t i;
-  for (i = 0; i < AES_BLOCKLEN; ++i) // The block in AES is always 128bit no matter the key size
-  {
-    buf[i] ^= Iv[i];
-  }
+    uint8_t i;
+    for (i = 0; i < AES_BLOCKLEN; ++i) // The block in AES is always 128bit no matter the key size
+    {
+        buf[i] ^= Iv[i];
+    }
 }
+#endif
+
+#if defined(CBC) && (CBC == 1)
 
 void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, size_t length)
 {
@@ -554,7 +552,7 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
       {
 	/* inc will overflow */
         if (ctx->Iv[bi] == 255)
-	{
+        {
           ctx->Iv[bi] = 0;
           continue;
         } 
@@ -570,3 +568,34 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
 
 #endif // #if defined(CTR) && (CTR == 1)
 
+#if defined(CFB) && (CFB == 1)
+
+
+void AES_CFB_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length)
+{
+    uintptr_t i;
+    for (i = 0; i < length; i += AES_BLOCKLEN)
+    {
+        Cipher((state_t*)ctx->Iv, ctx->RoundKey);
+        XorWithIv(buf, ctx->Iv);
+        memcpy(ctx->Iv, buf, AES_BLOCKLEN);
+        buf += AES_BLOCKLEN;
+    }
+}
+
+void AES_CFB_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf,  uint32_t length)
+{
+    uintptr_t i;
+    uint8_t storeNextIv[AES_BLOCKLEN];
+    for (i = 0; i < length; i += AES_BLOCKLEN)
+    {
+        memcpy(storeNextIv, buf, AES_BLOCKLEN);
+        Cipher((state_t*)ctx->Iv, ctx->RoundKey);
+        XorWithIv(buf, ctx->Iv);
+        memcpy(ctx->Iv, storeNextIv, AES_BLOCKLEN);
+        buf += AES_BLOCKLEN;
+    }
+
+}
+
+#endif // #if defined(CFB) && (CFB == 1)
