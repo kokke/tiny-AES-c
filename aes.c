@@ -326,12 +326,12 @@ static uint8_t Multiply(uint8_t x, uint8_t y)
        ((y>>4 & 1) * xtime(xtime(xtime(xtime(x)))))); /* this last call to xtime() can be omitted */
   }
 #else
-#define Multiply(x, y)                                \
-      (  ((y & 1) * x) ^                              \
-      ((y>>1 & 1) * xtime(x)) ^                       \
-      ((y>>2 & 1) * xtime(xtime(x))) ^                \
-      ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^         \
-      ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))   \
+#define Multiply(x, y)                                    \
+      (  (((y) & 1) * (x)) ^                              \
+      (((y)>>1 & 1) * xtime((x))) ^                       \
+      (((y)>>2 & 1) * xtime(xtime((x)))) ^                \
+      (((y)>>3 & 1) * xtime(xtime(xtime((x))))) ^         \
+      (((y)>>4 & 1) * xtime(xtime(xtime(xtime((x)))))))   \
 
 #endif
 
