@@ -98,8 +98,8 @@ static void test_encrypt_ecb_verbose(void)
 
     for (i = 0; i < 4; ++i)
     {
-      AES_ECB_encrypt(&ctx, plain_text + (i * 16));
-      phex(plain_text + (i * 16));
+        AES_ECB_encrypt(&ctx, plain_text + (i * 16));
+        phex(plain_text + (i * 16));
     }
     printf("\n");
 }
@@ -265,12 +265,12 @@ static int test_xcrypt_ctr(const char* xcrypt)
                         0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11, 0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef,
                         0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17, 0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10 };
     struct AES_ctx ctx;
-    
+
     AES_init_ctx_iv(&ctx, key, iv);
     AES_CTR_xcrypt_buffer(&ctx, in, 64);
-  
+
     printf("CTR %s: ", xcrypt);
-  
+
     if (0 == memcmp((char *) out, (char *) in, 64)) {
         printf("SUCCESS!\n");
 	return(0);
