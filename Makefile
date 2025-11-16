@@ -7,6 +7,7 @@ AR           = ar
 ARFLAGS      = rcs
 CFLAGS       = -Wall -Os -c
 LDFLAGS      = -Wall -Os -Wl,-Map,test.map
+OMPFLAGS     = -fopenmp
 ifdef AES192
 CFLAGS += -DAES192=1
 endif
@@ -25,7 +26,7 @@ SPLINT       = splint test.c aes.c -I$(INCLUDE_PATH) +charindex -unrecog
 default: test.elf
 
 .SILENT:
-.PHONY:  lint clean
+.PHONY:  lint clean benchmark
 
 test.hex : test.elf
 	echo copy object-code to new image and format in hex
@@ -50,7 +51,7 @@ aes.a : aes.o
 lib : aes.a
 
 clean:
-	rm -f *.OBJ *.LST *.o *.gch *.out *.hex *.map *.elf *.a
+	rm -f *.OBJ *.LST *.o *.gch *.out *.hex *.map *.elf *.a benchmark.elf
 
 test:
 	make clean && make && ./test.elf
@@ -59,3 +60,20 @@ test:
 
 lint:
 	$(call SPLINT)
+
+# OpenMP benchmark targets
+aes_openmp.o : aes_openmp.c aes_openmp.h aes.h
+	echo [CC] $@ $(CFLAGS) $(OMPFLAGS)
+	$(CC) $(CFLAGS) $(OMPFLAGS) -o $@ $<
+
+benchmark.o : benchmark.c aes.h aes_openmp.h
+	echo [CC] $@ $(CFLAGS) $(OMPFLAGS)
+	$(CC) $(CFLAGS) $(OMPFLAGS) -o $@ $<
+
+benchmark.elf : aes.o aes_openmp.o benchmark.o
+	echo [LD] $@ with OpenMP
+	$(LD) $(LDFLAGS) $(OMPFLAGS) -o $@ $^ -lrt
+
+benchmark: benchmark.elf
+	echo "Running benchmark..."
+	./benchmark.elf
