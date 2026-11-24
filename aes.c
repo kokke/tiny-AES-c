@@ -38,6 +38,16 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 #include <string.h> // CBC mode, for memset
 #include "aes.h"
 
+#if defined(TINY_AES_AESNI) && TINY_AES_AESNI
+#if defined(_MSC_VER)
+#include <intrin.h>
+#elif defined(__GNUC__) || defined(__clang__)
+#include <cpuid.h>
+#endif
+void tiny_aesni_xcrypt_blocks(const uint8_t* round_key, uint8_t* counter,
+                              uint8_t* buf, size_t blocks, uint8_t rounds);
+#endif
+
 /*****************************************************************************/
 /* Defines:                                                                  */
 /*****************************************************************************/
@@ -219,16 +229,38 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
 void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key)
 {
   KeyExpansion(ctx->RoundKey, key);
+#if defined(CTR) && (CTR == 1)
+  ctx->CtrUsed = AES_BLOCKLEN;
+  ctx->CtrUseAesni = 0;
+#if defined(TINY_AES_AESNI) && TINY_AES_AESNI
+#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
+  {
+    int registers[4];
+    __cpuid(registers, 1);
+    ctx->CtrUseAesni = (uint8_t)((registers[2] & (1 << 25)) != 0);
+  }
+#elif (defined(__i386__) || defined(__x86_64__)) && (defined(__GNUC__) || defined(__clang__))
+  {
+    unsigned int eax, ebx, ecx, edx;
+    if (__get_cpuid(1, &eax, &ebx, &ecx, &edx))
+      ctx->CtrUseAesni = (uint8_t)((ecx & bit_AES) != 0);
+  }
+#endif
+#endif
+#endif
 }
 #if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
 void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
 {
-  KeyExpansion(ctx->RoundKey, key);
-  memcpy (ctx->Iv, iv, AES_BLOCKLEN);
+  AES_init_ctx(ctx, key);
+  AES_ctx_set_iv(ctx, iv);
 }
 void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv)
 {
   memcpy (ctx->Iv, iv, AES_BLOCKLEN);
+#if defined(CTR) && (CTR == 1)
+  ctx->CtrUsed = AES_BLOCKLEN;
+#endif
 }
 #endif
 
@@ -410,7 +442,7 @@ static void InvShiftRows(state_t* state)
 #endif // #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
 
 // Cipher is the main function that encrypts the PlainText.
-static void Cipher(state_t* state, const uint8_t* RoundKey)
+static inline void Cipher(state_t* state, const uint8_t* RoundKey)
 {
   uint8_t round = 0;
 
@@ -534,38 +566,93 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
 
 #if defined(CTR) && (CTR == 1)
 
+static inline void CTR_increment(uint8_t* counter)
+{
+  int i;
+  for (i = AES_BLOCKLEN - 1; i >= 0; --i)
+  {
+    if (++counter[i] != 0)
+      break;
+  }
+}
+
+static inline void CTR_xcrypt_portable_blocks(struct AES_ctx* ctx, uint8_t* buf, size_t blocks)
+{
+  uint8_t stream[AES_BLOCKLEN];
+  while (blocks-- != 0)
+  {
+    size_t i;
+    memcpy(stream, ctx->Iv, AES_BLOCKLEN);
+    Cipher((state_t*)stream, ctx->RoundKey);
+    CTR_increment(ctx->Iv);
+    for (i = 0; i < AES_BLOCKLEN; ++i)
+      buf[i] ^= stream[i];
+    buf += AES_BLOCKLEN;
+  }
+}
+
+#if !defined(TINY_AES_CTR_ORIGINAL) || !TINY_AES_CTR_ORIGINAL
+static inline void CTR_xcrypt_blocks(struct AES_ctx* ctx, uint8_t* buf, size_t blocks)
+{
+#if defined(TINY_AES_AESNI) && TINY_AES_AESNI
+  if (ctx->CtrUseAesni)
+  {
+    tiny_aesni_xcrypt_blocks(ctx->RoundKey, ctx->Iv, buf, blocks, Nr);
+    return;
+  }
+#endif
+  CTR_xcrypt_portable_blocks(ctx, buf, blocks);
+}
+#endif
+
 /* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
 {
-  uint8_t buffer[AES_BLOCKLEN];
-  
-  size_t i;
-  int bi;
-  for (i = 0, bi = AES_BLOCKLEN; i < length; ++i, ++bi)
+#if defined(TINY_AES_CTR_ORIGINAL) && TINY_AES_CTR_ORIGINAL
+  /* Benchmark control: retain the original byte-loop shape with correct state. */
+  while (length-- != 0)
   {
-    if (bi == AES_BLOCKLEN) /* we need to regen xor compliment in buffer */
+    if (ctx->CtrUsed == AES_BLOCKLEN)
     {
-      
-      memcpy(buffer, ctx->Iv, AES_BLOCKLEN);
-      Cipher((state_t*)buffer,ctx->RoundKey);
-
-      /* Increment Iv and handle overflow */
-      for (bi = (AES_BLOCKLEN - 1); bi >= 0; --bi)
-      {
-	/* inc will overflow */
-        if (ctx->Iv[bi] == 255)
-	{
-          ctx->Iv[bi] = 0;
-          continue;
-        } 
-        ctx->Iv[bi] += 1;
-        break;   
-      }
-      bi = 0;
+      memset(ctx->CtrBuffer, 0, AES_BLOCKLEN);
+      CTR_xcrypt_portable_blocks(ctx, ctx->CtrBuffer, 1);
+      ctx->CtrUsed = 0;
     }
-
-    buf[i] = (buf[i] ^ buffer[bi]);
+    *buf++ ^= ctx->CtrBuffer[ctx->CtrUsed++];
   }
+#else
+  size_t i, take, blocks;
+
+  if (ctx->CtrUsed != AES_BLOCKLEN)
+  {
+    take = AES_BLOCKLEN - ctx->CtrUsed;
+    if (take > length)
+      take = length;
+    for (i = 0; i < take; ++i)
+      buf[i] ^= ctx->CtrBuffer[ctx->CtrUsed + i];
+    ctx->CtrUsed = (uint8_t)(ctx->CtrUsed + take);
+    buf += take;
+    length -= take;
+  }
+
+  blocks = length / AES_BLOCKLEN;
+  if (blocks != 0)
+  {
+    CTR_xcrypt_blocks(ctx, buf, blocks);
+    take = blocks * AES_BLOCKLEN;
+    buf += take;
+    length -= take;
+  }
+
+  if (length != 0)
+  {
+    memset(ctx->CtrBuffer, 0, AES_BLOCKLEN);
+    CTR_xcrypt_blocks(ctx, ctx->CtrBuffer, 1);
+    for (i = 0; i < length; ++i)
+      buf[i] ^= ctx->CtrBuffer[i];
+    ctx->CtrUsed = (uint8_t)length;
+  }
+#endif
 }
 
 #endif // #if defined(CTR) && (CTR == 1)

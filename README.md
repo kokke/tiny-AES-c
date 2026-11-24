@@ -26,6 +26,15 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 ```
 
+CTR retains unused keystream bytes in the context, so a message may be supplied
+in arbitrarily sized calls. Calling `AES_ctx_set_iv` starts a new message and
+discards any retained bytes.
+
+CMake builds enable a runtime-dispatched AES-NI CTR path on supported x86
+compilers. Only `aesni.c` is compiled with `-maes`; the library checks CPUID
+before entering it and otherwise uses the portable implementation. Pass
+`-DTINY_AES_ENABLE_AESNI=OFF` to build the portable implementation only.
+
 Important notes: 
  * No padding is provided so for CBC and ECB all buffers should be multiples of 16 bytes. For padding [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7) is recommendable.
  * ECB mode is considered unsafe for most uses and is not implemented in streaming mode. If you need this mode, call the function for every block of 16 bytes you need encrypted. See [wikipedia's article on ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB)) for more details.

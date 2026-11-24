@@ -47,6 +47,11 @@ struct AES_ctx
 #if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
   uint8_t Iv[AES_BLOCKLEN];
 #endif
+#if defined(CTR) && (CTR == 1)
+  uint8_t CtrBuffer[AES_BLOCKLEN];
+  uint8_t CtrUsed;
+  uint8_t CtrUseAesni;
+#endif
 };
 
 void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key);
@@ -83,6 +88,7 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 // Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
 // NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
 //        no IV should ever be reused with the same key 
+//        unused keystream is retained across calls; setting the IV discards it
 void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)

@@ -267,7 +267,10 @@ static int test_xcrypt_ctr(const char* xcrypt)
     struct AES_ctx ctx;
     
     AES_init_ctx_iv(&ctx, key, iv);
-    AES_CTR_xcrypt_buffer(&ctx, in, 64);
+    AES_CTR_xcrypt_buffer(&ctx, in, 1);
+    AES_CTR_xcrypt_buffer(&ctx, in + 1, 15);
+    AES_CTR_xcrypt_buffer(&ctx, in + 16, 17);
+    AES_CTR_xcrypt_buffer(&ctx, in + 33, 31);
   
     printf("CTR %s: ", xcrypt);
   
